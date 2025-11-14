@@ -50,6 +50,14 @@
                 </div>
             </section>
 
+            <!-- List of Added Particles -->
+            <section id="particle-list-section" class="hidden">
+                <h2 class="text-2xl font-semibold border-b-2 border-gray-700 pb-2 mb-4">Added Particles</h2>
+                <div id="particle-list-container" class="space-y-2 bg-gray-700 p-4 rounded-lg">
+                    <!-- Added particles will be listed here -->
+                </div>
+            </section>
+
             <!-- Step 2: Snowstorm File -->
             <section id="step-2" class="space-y-4">
                 <h2 class="text-2xl font-semibold border-b-2 border-gray-700 pb-2">Step 2: Upload Snowstorm .json File</h2>
@@ -68,16 +76,23 @@
                 </div>
             </section>
 
-            <!-- Step 4: Generate -->
-            <section id="step-4">
-                <button id="generate-button" class="w-full bg-green-600 hover:bg-green-700 text-white text-xl font-bold py-4 px-6 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed" disabled>
-                    Generate Pack
+            <!-- Step 4: Add Particle Button -->
+            <section id="step-add-particle" class="hidden">
+                <button id="add-particle-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold py-3 px-6 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed" disabled>
+                    Add Particle to Pack
+                </button>
+            </section>
+
+            <!-- Step 5: Generate -->
+            <section id="step-generate" class="hidden">
+                <button id="generate-button" class="w-full bg-green-600 hover:bg-green-700 text-white text-xl font-bold py-4 px-6 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105">
+                    Generate Pack with Added Particles
                 </button>
                 <div id="error-message" class="text-red-400 text-center mt-4 font-medium"></div>
             </section>
 
-            <!-- Step 5: Download & Command (Dynamically populated) -->
-            <section id="step-5" class="hidden space-y-6 text-center">
+            <!-- Step 6: Download & Command (Dynamically populated) -->
+            <section id="step-download" class="hidden space-y-6 text-center">
                 <h2 class="text-3xl font-semibold text-green-400">Pack Generated Successfully!</h2>
                 
                 <!-- Download Button -->
@@ -89,11 +104,11 @@
 
                 <!-- Command Output -->
                 <div>
-                    <h3 classs="text-xl font-semibold mb-2">Your Particle Command:</h3>
-                    <p class="text-gray-400 mb-2">Use this command in-game to spawn your particle. Click to copy.</p>
+                    <h3 classs="text-xl font-semibold mb-2">Your Particle Commands:</h3>
+                    <p class="text-gray-400 mb-2">Use these commands in-game to spawn your particles. Click to copy.</p>
                     <div id="command-output">
                         <button id="copy-button" title="Copy to clipboard">Copy</button>
-                        <pre><code id="command-text"></code></pre>
+                        <pre><code id="command-text" class="whitespace-pre-wrap"></code></pre>
                     </div>
                 </div>
             </section>
@@ -102,21 +117,35 @@
     </div>
 
     <script type="module">
-        // --- State Management ---
-        let snowstormJson = null;
-        let originalJsonFileName = 'particle.json';
-        let requiredTextures = new Set();
-        let uploadedTextures = new Map(); // Maps path (string) to File object
+        // --- Global State ---
+        let particleQueue = []; // Stores all added particle data
+        let allUploadedTextures = new Map(); // Global map of "textures/path.png" -> File object
+
+        // --- Current Particle State (Temporary) ---
+        let currentJson = null;
+        let currentOriginalFileName = 'particle.json';
+        let currentRequiredTextures = new Set();
+        let currentNewTexturesToUpload = new Set();
 
         // --- DOM Elements ---
         const packNameInput = document.getElementById('pack-name');
         const packDescInput = document.getElementById('pack-desc');
         const jsonFileInput = document.getElementById('json-file-input');
+        
+        const particleListSection = document.getElementById('particle-list-section');
+        const particleListContainer = document.getElementById('particle-list-container');
+        
         const step3Section = document.getElementById('step-3');
         const textureUploadsContainer = document.getElementById('texture-uploads-container');
+        
+        const stepAddParticle = document.getElementById('step-add-particle');
+        const addParticleButton = document.getElementById('add-particle-button');
+        
+        const stepGenerate = document.getElementById('step-generate');
         const generateButton = document.getElementById('generate-button');
         const errorMessage = document.getElementById('error-message');
-        const step5Section = document.getElementById('step-5');
+        
+        const stepDownload = document.getElementById('step-download');
         const downloadLink = document.getElementById('download-link');
         const commandText = document.getElementById('command-text');
         const copyButton = document.getElementById('copy-button');
@@ -144,86 +173,146 @@
         }
 
         /**
-         * Checks if all form conditions are met to enable the generate button.
+         * Checks if the *current* particle is valid and ready to be added.
          */
-        function validateFormState() {
-            const nameValid = packNameInput.value.trim() !== '';
-            const descValid = packDescInput.value.trim() !== '';
-            const jsonValid = snowstormJson !== null;
-            const texturesValid = requiredTextures.size > 0 && uploadedTextures.size === requiredTextures.size;
+        function validateCurrentParticleState() {
+            const jsonValid = currentJson !== null;
             
-            // Handle case where particle has NO textures
-            const noTextureParticleValid = requiredTextures.size === 0 && jsonValid;
+            // Check if all *new* textures for *this* particle are uploaded
+            let newTexturesReady = true;
+            for (const path of currentNewTexturesToUpload) {
+                if (!allUploadedTextures.has(path)) {
+                    newTexturesReady = false;
+                    break;
+                }
+            }
 
-            if ((texturesValid || noTextureParticleValid) && nameValid && descValid) {
-                generateButton.disabled = false;
+            if (jsonValid && newTexturesReady) {
+                addParticleButton.disabled = false;
                 errorMessage.textContent = '';
             } else {
-                generateButton.disabled = true;
+                addParticleButton.disabled = true;
             }
         }
+
+        /**
+         * Checks if the final pack is ready to be generated.
+         */
+        function validatePackState() {
+            const nameValid = packNameInput.value.trim() !== '';
+            const descValid = packDescInput.value.trim() !== '';
+            const particlesAdded = particleQueue.length > 0;
+
+            if (nameValid && descValid && particlesAdded) {
+                stepGenerate.classList.remove('hidden');
+            } else {
+                stepGenerate.classList.add('hidden');
+            }
+        }
+
 
         /**
          * Parses the Snowstorm JSON file content.
          */
         function handleJsonFile(event) {
             const file = event.target.files[0];
-            if (!file) return;
+            if (!file) {
+                resetCurrentParticle();
+                return;
+            }
 
-            originalJsonFileName = file.name;
+            currentOriginalFileName = file.name;
             const reader = new FileReader();
 
             reader.onload = (e) => {
                 try {
                     const jsonString = e.target.result;
-                    snowstormJson = JSON.parse(jsonString);
+                    let tempJson = JSON.parse(jsonString); // Parse once to validate
                     
                     // Basic validation for Snowstorm file
-                    if (!snowstormJson.particle_effect || !snowstormJson.particle_effect.description) {
+                    if (!tempJson.particle_effect || !tempJson.particle_effect.description) {
                         throw new Error("This doesn't look like a valid Snowstorm JSON file.");
                     }
                     
-                    // Find all texture paths
-                    // This regex finds all strings that look like "textures/..."
+                    // --- NEW LOGIC: Unique Texture Renaming ---
+                    // 1. Get a unique prefix from the filename
+                    const particlePrefix = currentOriginalFileName
+                        .replace(/.json$/i, '') // remove .json
+                        .replace(/[^a-z0-9]/gi, '_'); // sanitize
+
+                    // 2. Find all original texture paths
                     const textureRegex = /"(textures\/[^"]+)"/g;
                     const matches = jsonString.match(textureRegex) || [];
-                    
-                    // Clean up and de-duplicate texture paths
-                    requiredTextures = new Set(matches.map(path => path.substring(1, path.length - 1)));
+                    const originalPaths = new Set(matches.map(path => path.substring(1, path.length - 1)));
+
+                    let modifiedJsonString = jsonString;
+                    currentRequiredTextures.clear(); // This will store the *new* paths
+
+                    // 3. Create new paths and replace them in the string
+                    originalPaths.forEach(originalPath => {
+                        const pathParts = originalPath.split('/');
+                        const fileName = pathParts.pop(); // e.g., "flame.png"
+                        
+                        // Create a new unique filename
+                        const newFileName = `${particlePrefix}_${fileName}`; 
+                        
+                        // Create a new path. Let's put them in a 'particles' subfolder
+                        // "textures/particles/my_particle_flame.png"
+                        const newPath = `textures/particles/${newFileName}`; 
+                        
+                        // Add this *new* path to the list of required textures for this particle
+                        currentRequiredTextures.add(newPath);
+
+                        // Replace all instances of the old path *in the string* with the new one
+                        // Use a regex to safely replace only the quoted string
+                        modifiedJsonString = modifiedJsonString.replace(new RegExp(`"${originalPath}"`, 'g'), `"${newPath}"`);
+                    });
+
+                    // 4. Re-parse the JSON with the *modified* paths
+                    currentJson = JSON.parse(modifiedJsonString);
+                    // --- END NEW LOGIC ---
+
+                    // Figure out which textures are *new*
+                    currentNewTexturesToUpload.clear();
+                    currentRequiredTextures.forEach(path => {
+                        // Since paths are now unique (e.g., "textures/particles/particle1_flame.png"),
+                        // this check will correctly see them as new.
+                        if (!allUploadedTextures.has(path)) {
+                            currentNewTexturesToUpload.add(path);
+                        }
+                    });
 
                     // Render the texture upload inputs
                     renderTextureInputs();
-                    validateFormState();
+                    validateCurrentParticleState();
 
                 } catch (err) {
                     showError("Error parsing JSON file: " + err.message);
-                    snowstormJson = null;
-                    requiredTextures.clear();
-                    renderTextureInputs(); // Clear inputs
+                    resetCurrentParticle();
                 }
             };
 
             reader.onerror = () => {
                 showError("Failed to read the file.");
-                snowstormJson = null;
+                resetCurrentParticle();
             };
 
             reader.readAsText(file);
         }
 
         /**
-         * Creates and displays file input fields for each required texture.
+         * Creates and displays file input fields for *only* new, un-uploaded textures.
          */
         function renderTextureInputs() {
             textureUploadsContainer.innerHTML = ''; // Clear previous inputs
-            uploadedTextures.clear(); // Clear old file handles
-
-            if (requiredTextures.size === 0 && snowstormJson) {
-                // This particle uses no custom textures
-                textureUploadsContainer.innerHTML = '<p class="text-gray-300 font-medium text-center">This particle does not require any custom textures.</p>';
+            
+            if (currentNewTexturesToUpload.size === 0 && currentJson) {
+                // This particle uses no *new* textures
+                textureUploadsContainer.innerHTML = '<p class="text-gray-300 font-medium text-center">This particle uses textures you have already provided.</p>';
                 step3Section.classList.remove('hidden');
-            } else if (requiredTextures.size > 0) {
-                requiredTextures.forEach(path => {
+                stepAddParticle.classList.remove('hidden');
+            } else if (currentNewTexturesToUpload.size > 0) {
+                currentNewTexturesToUpload.forEach(path => {
                     const inputId = `texture-input-${path.replace(/[\/\.]/g, '-')}`;
                     
                     const container = document.createElement('div');
@@ -246,16 +335,19 @@
                     input.addEventListener('change', (e) => {
                         const file = e.target.files[0];
                         if (file) {
-                            uploadedTextures.set(path, file);
+                            allUploadedTextures.set(path, file); // Add to GLOBAL map
                             // Add a visual cue
                             label.textContent = `✅ ${path} (Uploaded: ${file.name})`;
                             label.classList.add('text-green-400');
+                            // Remove this input from the "needed" set for validation
+                            currentNewTexturesToUpload.delete(path);
                         } else {
-                            uploadedTextures.delete(path);
+                            allUploadedTextures.delete(path); // Remove from GLOBAL map
                             label.textContent = `Required Path: ${path}`;
                             label.classList.remove('text-green-400');
+                            currentNewTexturesToUpload.add(path); // Re-add to "needed" set
                         }
-                        validateFormState();
+                        validateCurrentParticleState();
                     });
                     
                     container.appendChild(label);
@@ -263,9 +355,65 @@
                     textureUploadsContainer.appendChild(container);
                 });
                 step3Section.classList.remove('hidden');
+                stepAddParticle.classList.remove('hidden');
             } else {
                 step3Section.classList.add('hidden');
+                stepAddParticle.classList.add('hidden');
             }
+        }
+
+        /**
+         * Resets the "current particle" UI to add another one.
+         */
+        function resetCurrentParticle() {
+            currentJson = null;
+            currentOriginalFileName = 'particle.json';
+            currentRequiredTextures.clear();
+            currentNewTexturesToUpload.clear();
+
+            jsonFileInput.value = ''; // Clear file input
+            step3Section.classList.add('hidden');
+            textureUploadsContainer.innerHTML = '';
+            stepAddParticle.classList.add('hidden');
+            addParticleButton.disabled = true;
+        }
+
+        /**
+         * Updates the list of added particles shown to the user.
+         */
+        function updateParticleListUI() {
+            particleListContainer.innerHTML = ''; // Clear list
+            if (particleQueue.length === 0) {
+                particleListSection.classList.add('hidden');
+                return;
+            }
+
+            particleQueue.forEach((particle, index) => {
+                const item = document.createElement('div');
+                item.className = "text-green-300";
+                item.textContent = `Particle ${index + 1}: ${particle.identifier} (from ${particle.originalFileName})`;
+                particleListContainer.appendChild(item);
+            });
+            particleListSection.classList.remove('hidden');
+        }
+
+        /**
+         * Adds the fully-defined "current" particle to the main pack queue.
+         */
+        function handleAddParticleClick() {
+            if (addParticleButton.disabled || !currentJson) return;
+
+            // Add to queue
+            particleQueue.push({
+                json: currentJson,
+                originalFileName: currentOriginalFileName,
+                identifier: currentJson.particle_effect.description.identifier
+            });
+
+            // Update UI
+            updateParticleListUI();
+            resetCurrentParticle();
+            validatePackState(); // Check if we can enable the final "Generate" button
         }
 
         /**
@@ -297,8 +445,12 @@
          */
         async function handleGenerateClick() {
             // Re-validate just in case
-            if (generateButton.disabled) {
-                showError("Please fill out all required fields.");
+            if (particleQueue.length === 0) {
+                showError("Please add at least one particle first.");
+                return;
+            }
+            if (packNameInput.value.trim() === '' || packDescInput.value.trim() === '') {
+                showError("Please provide a Pack Name and Description.");
                 return;
             }
 
@@ -313,12 +465,13 @@
                 const manifest = createManifest(packName, packDesc, uuid1, uuid2);
                 zip.file("manifest.json", JSON.stringify(manifest, null, 2));
 
-                // 2. Add the particle JSON file
-                // We save it with its original filename inside the 'particles' folder
-                zip.file(`particles/${originalJsonFileName}`, JSON.stringify(snowstormJson, null, 2));
+                // 2. Add all particle JSON files
+                for (const particle of particleQueue) {
+                    zip.file(`particles/${particle.originalFileName}`, JSON.stringify(particle.json, null, 2));
+                }
 
-                // 3. Add all uploaded textures with their correct paths
-                for (const [path, file] of uploadedTextures.entries()) {
+                // 3. Add all unique, uploaded textures
+                for (const [path, file] of allUploadedTextures.entries()) {
                     // JSZip automatically creates folders from the path
                     zip.file(path, file);
                 }
@@ -333,12 +486,12 @@
                 const safeFileName = packName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
                 downloadLink.download = `${safeFileName}.mcpack`;
                 
-                // 6. Show the particle command
-                const particleId = snowstormJson.particle_effect.description.identifier;
-                commandText.textContent = `/particle ${particleId} ~ ~1 ~`;
+                // 6. Show all particle commands
+                const commands = particleQueue.map(p => `/particle ${p.identifier} ~ ~1 ~`).join('\n');
+                commandText.textContent = commands;
                 
                 // 7. Show the final section
-                step5Section.classList.remove('hidden');
+                stepDownload.classList.remove('hidden');
 
             } catch (err) {
                 showError("An error occurred during pack generation: " + err.message);
@@ -368,13 +521,16 @@
 
         // --- Event Listeners ---
         jsonFileInput.addEventListener('change', handleJsonFile);
-        packNameInput.addEventListener('input', validateFormState);
-        packDescInput.addEventListener('input', validateFormState);
+        packNameInput.addEventListener('input', validatePackState);
+        packDescInput.addEventListener('input', validatePackState);
+        
+        addParticleButton.addEventListener('click', handleAddParticleClick);
         generateButton.addEventListener('click', handleGenerateClick);
         copyButton.addEventListener('click', copyCommandToClipboard);
 
-        // Initial check in case of page refresh with filled fields (less common in snippets)
-        validateFormState();
+        // Initial validation checks
+        validatePackState();
+        validateCurrentParticleState();
 
     </script>
 </body>
