@@ -48,6 +48,12 @@
                     <label for="pack-desc" class="block text-sm font-medium text-gray-300 mb-2">Pack Description</label>
                     <input type="text" id="pack-desc" placeholder="A pack full of awesome particles" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
+                <!-- New Pack Icon Uploader -->
+                <div>
+                    <label for="pack-icon" class="block text-sm font-medium text-gray-300 mb-2">Pack Icon (Optional)</label>
+                    <input type="file" id="pack-icon" accept="image/png" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3">
+                    <p id="pack-icon-feedback" class="text-sm text-green-400 mt-2 hidden"></p>
+                </div>
             </section>
 
             <!-- List of Added Particles -->
@@ -120,6 +126,7 @@
         // --- Global State ---
         let particleQueue = []; // Stores all added particle data
         let allUploadedTextures = new Map(); // Global map of "textures/path.png" -> File object
+        let packIconFile = null; // To store the optional pack_icon.png
 
         // --- Current Particle State (Temporary) ---
         let currentJson = null;
@@ -130,6 +137,8 @@
         // --- DOM Elements ---
         const packNameInput = document.getElementById('pack-name');
         const packDescInput = document.getElementById('pack-desc');
+        const packIconInput = document.getElementById('pack-icon'); // Icon input
+        const packIconFeedback = document.getElementById('pack-icon-feedback'); // Icon feedback
         const jsonFileInput = document.getElementById('json-file-input');
         
         const particleListSection = document.getElementById('particle-list-section');
@@ -161,6 +170,21 @@
                 var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
                 return v.toString(16);
             });
+        }
+
+        /**
+         * Stores the uploaded pack icon file.
+         */
+        function handlePackIconUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                packIconFile = file;
+                packIconFeedback.textContent = `✅ Icon selected: ${file.name}`;
+                packIconFeedback.classList.remove('hidden');
+            } else {
+                packIconFile = null;
+                packIconFeedback.classList.add('hidden');
+            }
         }
 
         /**
@@ -465,6 +489,11 @@
                 const manifest = createManifest(packName, packDesc, uuid1, uuid2);
                 zip.file("manifest.json", JSON.stringify(manifest, null, 2));
 
+                // Add pack_icon.png if it exists
+                if (packIconFile) {
+                    zip.file("pack_icon.png", packIconFile);
+                }
+
                 // 2. Add all particle JSON files
                 for (const particle of particleQueue) {
                     zip.file(`particles/${particle.originalFileName}`, JSON.stringify(particle.json, null, 2));
@@ -523,6 +552,7 @@
         jsonFileInput.addEventListener('change', handleJsonFile);
         packNameInput.addEventListener('input', validatePackState);
         packDescInput.addEventListener('input', validatePackState);
+        packIconInput.addEventListener('change', handlePackIconUpload); // Listener for icon
         
         addParticleButton.addEventListener('click', handleAddParticleClick);
         generateButton.addEventListener('click', handleGenerateClick);
