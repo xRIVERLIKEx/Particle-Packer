@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Particle Pack Generator</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load JSZip library for creating zip files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        /* Custom styles for dark mode file inputs */
+        input[type="file"]::file-selector-button {
+            @apply bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg cursor-pointer transition-colors duration-200;
+        }
+        input[type="file"] {
+            @apply text-gray-300;
+        }
+        /* Style for the copyable command block */
+        #command-output {
+            @apply bg-gray-900 text-green-400 p-4 rounded-lg font-mono relative;
+        }
+        #copy-button {
+            @apply absolute top-2 right-2 bg-gray-700 hover:bg-gray-600 text-white py-1 px-3 rounded-lg text-sm;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white font-sans p-6 md:p-12">
+
+    <div class="max-w-3xl mx-auto bg-gray-800 rounded-2xl shadow-2xl p-8 md:p-10">
+        
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-green-400 mb-2">Particle Pack Generator</h1>
+            <p class="text-xl text-gray-300">For Minecraft Bedrock & Education</p>
+        </header>
+
+        <!-- Main Form -->
+        <div class="space-y-8">
+
+            <!-- Step 1: Pack Details -->
+            <section id="step-1" class="space-y-4">
+                <h2 class="text-2xl font-semibold border-b-2 border-gray-700 pb-2">Step 1: Pack Details</h2>
+                <div>
+                    <label for="pack-name" class="block text-sm font-medium text-gray-300 mb-2">Pack Name</label>
+                    <input type="text" id="pack-name" placeholder="e.g., My Awesome Particles" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label for="pack-desc" class="block text-sm font-medium text-gray-300 mb-2">Pack Description</label>
+                    <input type="text" id="pack-desc" placeholder="A pack full of awesome particles" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+            </section>
+
+            <!-- Step 2: Snowstorm File -->
+            <section id="step-2" class="space-y-4">
+                <h2 class="text-2xl font-semibold border-b-2 border-gray-700 pb-2">Step 2: Upload Snowstorm .json File</h2>
+                <div>
+                    <label for="json-file-input" class="block text-sm font-medium text-gray-300 mb-2">Select your particle's .json file:</label>
+                    <input type="file" id="json-file-input" accept=".json" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3">
+                </div>
+            </section>
+
+            <!-- Step 3: Textures (Dynamically populated) -->
+            <section id="step-3" class="hidden space-y-4">
+                <h2 class="text-2xl font-semibold border-b-2 border-gray-700 pb-2">Step 3: Upload Required Textures</h2>
+                <p class="text-gray-400">The app detected the following textures are needed. Please upload a <span class="font-bold text-yellow-400">.png</span> for each one.</p>
+                <div id="texture-uploads-container" class="space-y-5 bg-gray-700 p-6 rounded-lg">
+                    <!-- Texture inputs will be added here by JS -->
+                </div>
+            </section>
+
+            <!-- Step 4: Generate -->
+            <section id="step-4">
+                <button id="generate-button" class="w-full bg-green-600 hover:bg-green-700 text-white text-xl font-bold py-4 px-6 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed" disabled>
+                    Generate Pack
+                </button>
+                <div id="error-message" class="text-red-400 text-center mt-4 font-medium"></div>
+            </section>
+
+            <!-- Step 5: Download & Command (Dynamically populated) -->
+            <section id="step-5" class="hidden space-y-6 text-center">
+                <h2 class="text-3xl font-semibold text-green-400">Pack Generated Successfully!</h2>
+                
+                <!-- Download Button -->
+                <div>
+                    <a id="download-link" class="inline-block bg-blue-600 hover:bg-blue-700 text-white text-xl font-bold py-4 px-8 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105">
+                        Download .mcpack
+                    </a>
+                </div>
+
+                <!-- Command Output -->
+                <div>
+                    <h3 classs="text-xl font-semibold mb-2">Your Particle Command:</h3>
+                    <p class="text-gray-400 mb-2">Use this command in-game to spawn your particle. Click to copy.</p>
+                    <div id="command-output">
+                        <button id="copy-button" title="Copy to clipboard">Copy</button>
+                        <pre><code id="command-text"></code></pre>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <script type="module">
+        // --- State Management ---
+        let snowstormJson = null;
+        let originalJsonFileName = 'particle.json';
+        let requiredTextures = new Set();
+        let uploadedTextures = new Map(); // Maps path (string) to File object
+
+        // --- DOM Elements ---
+        const packNameInput = document.getElementById('pack-name');
+        const packDescInput = document.getElementById('pack-desc');
+        const jsonFileInput = document.getElementById('json-file-input');
+        const step3Section = document.getElementById('step-3');
+        const textureUploadsContainer = document.getElementById('texture-uploads-container');
+        const generateButton = document.getElementById('generate-button');
+        const errorMessage = document.getElementById('error-message');
+        const step5Section = document.getElementById('step-5');
+        const downloadLink = document.getElementById('download-link');
+        const commandText = document.getElementById('command-text');
+        const copyButton = document.getElementById('copy-button');
+
+        // --- Helper Functions ---
+        
+        /**
+         * Generates a random UUID (v4).
+         * Required for all manifest.json files.
+         */
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        /**
+         * Displays an error message to the user.
+         */
+        function showError(message) {
+            errorMessage.textContent = message;
+            // Clear the error after 5 seconds
+            setTimeout(() => { errorMessage.textContent = ''; }, 5000);
+        }
+
+        /**
+         * Checks if all form conditions are met to enable the generate button.
+         */
+        function validateFormState() {
+            const nameValid = packNameInput.value.trim() !== '';
+            const descValid = packDescInput.value.trim() !== '';
+            const jsonValid = snowstormJson !== null;
+            const texturesValid = requiredTextures.size > 0 && uploadedTextures.size === requiredTextures.size;
+            
+            // Handle case where particle has NO textures
+            const noTextureParticleValid = requiredTextures.size === 0 && jsonValid;
+
+            if ((texturesValid || noTextureParticleValid) && nameValid && descValid) {
+                generateButton.disabled = false;
+                errorMessage.textContent = '';
+            } else {
+                generateButton.disabled = true;
+            }
+        }
+
+        /**
+         * Parses the Snowstorm JSON file content.
+         */
+        function handleJsonFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            originalJsonFileName = file.name;
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                try {
+                    const jsonString = e.target.result;
+                    snowstormJson = JSON.parse(jsonString);
+                    
+                    // Basic validation for Snowstorm file
+                    if (!snowstormJson.particle_effect || !snowstormJson.particle_effect.description) {
+                        throw new Error("This doesn't look like a valid Snowstorm JSON file.");
+                    }
+                    
+                    // Find all texture paths
+                    // This regex finds all strings that look like "textures/..."
+                    const textureRegex = /"(textures\/[^"]+)"/g;
+                    const matches = jsonString.match(textureRegex) || [];
+                    
+                    // Clean up and de-duplicate texture paths
+                    requiredTextures = new Set(matches.map(path => path.substring(1, path.length - 1)));
+
+                    // Render the texture upload inputs
+                    renderTextureInputs();
+                    validateFormState();
+
+                } catch (err) {
+                    showError("Error parsing JSON file: " + err.message);
+                    snowstormJson = null;
+                    requiredTextures.clear();
+                    renderTextureInputs(); // Clear inputs
+                }
+            };
+
+            reader.onerror = () => {
+                showError("Failed to read the file.");
+                snowstormJson = null;
+            };
+
+            reader.readAsText(file);
+        }
+
+        /**
+         * Creates and displays file input fields for each required texture.
+         */
+        function renderTextureInputs() {
+            textureUploadsContainer.innerHTML = ''; // Clear previous inputs
+            uploadedTextures.clear(); // Clear old file handles
+
+            if (requiredTextures.size === 0 && snowstormJson) {
+                // This particle uses no custom textures
+                textureUploadsContainer.innerHTML = '<p class="text-gray-300 font-medium text-center">This particle does not require any custom textures.</p>';
+                step3Section.classList.remove('hidden');
+            } else if (requiredTextures.size > 0) {
+                requiredTextures.forEach(path => {
+                    const inputId = `texture-input-${path.replace(/[\/\.]/g, '-')}`;
+                    
+                    const container = document.createElement('div');
+                    container.className = "border-b border-gray-600 pb-4";
+                    
+                    const label = document.createElement('label');
+                    label.htmlFor = inputId;
+                    label.className = "block text-sm font-medium text-gray-300 mb-2";
+                    label.textContent = `Required Path: ${path}`;
+                    
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.id = inputId;
+                    input.accept = 'image/png'; // Only allow PNGs as they are standard
+                    input.className = 'w-full bg-gray-600 border border-gray-500 rounded-lg p-2';
+                    
+                    // Store the required path in the input's dataset
+                    input.dataset.path = path;
+                    
+                    input.addEventListener('change', (e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                            uploadedTextures.set(path, file);
+                            // Add a visual cue
+                            label.textContent = `✅ ${path} (Uploaded: ${file.name})`;
+                            label.classList.add('text-green-400');
+                        } else {
+                            uploadedTextures.delete(path);
+                            label.textContent = `Required Path: ${path}`;
+                            label.classList.remove('text-green-400');
+                        }
+                        validateFormState();
+                    });
+                    
+                    container.appendChild(label);
+                    container.appendChild(input);
+                    textureUploadsContainer.appendChild(container);
+                });
+                step3Section.classList.remove('hidden');
+            } else {
+                step3Section.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Creates the manifest.json file content.
+         */
+        function createManifest(name, desc, uuid1, uuid2) {
+            // This function had a syntax error. It's now fixed.
+            return {
+                "format_version": 2,
+                "header": {
+                    "name": name,
+                    "description": desc,
+                    "uuid": uuid1,
+                    "version": [1, 0, 0],
+                    "min_engine_version": [1, 16, 0] // Common base version
+                },
+                "modules": [
+                    {
+                        "type": "resources", // Correct type for resource packs
+                        "uuid": uuid2,
+                        "version": [1, 0, 0]
+                    }
+                ]
+            };
+        }
+
+        /**
+         * Main function to generate the .mcpack file.
+         */
+        async function handleGenerateClick() {
+            // Re-validate just in case
+            if (generateButton.disabled) {
+                showError("Please fill out all required fields.");
+                return;
+            }
+
+            try {
+                const zip = new JSZip();
+                const packName = packNameInput.value.trim();
+                const packDesc = packDescInput.value.trim();
+                const uuid1 = generateUUID();
+                const uuid2 = generateUUID();
+
+                // 1. Create and add manifest.json
+                const manifest = createManifest(packName, packDesc, uuid1, uuid2);
+                zip.file("manifest.json", JSON.stringify(manifest, null, 2));
+
+                // 2. Add the particle JSON file
+                // We save it with its original filename inside the 'particles' folder
+                zip.file(`particles/${originalJsonFileName}`, JSON.stringify(snowstormJson, null, 2));
+
+                // 3. Add all uploaded textures with their correct paths
+                for (const [path, file] of uploadedTextures.entries()) {
+                    // JSZip automatically creates folders from the path
+                    zip.file(path, file);
+                }
+
+                // 4. Generate the zip file as a blob
+                const blob = await zip.generateAsync({ type: "blob" });
+
+                // 5. Create download link
+                const url = URL.createObjectURL(blob);
+                downloadLink.href = url;
+                // Sanitize pack name for use in filename
+                const safeFileName = packName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                downloadLink.download = `${safeFileName}.mcpack`;
+                
+                // 6. Show the particle command
+                const particleId = snowstormJson.particle_effect.description.identifier;
+                commandText.textContent = `/particle ${particleId} ~ ~1 ~`;
+                
+                // 7. Show the final section
+                step5Section.classList.remove('hidden');
+
+            } catch (err) {
+                showError("An error occurred during pack generation: " + err.message);
+                console.error(err);
+            }
+        }
+        
+        /**
+         * Copies the generated command to the clipboard.
+         */
+        function copyCommandToClipboard() {
+            // Use a temporary textarea for broad compatibility
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = commandText.textContent;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            try {
+                document.execCommand('copy');
+                // Give user feedback
+                copyButton.textContent = 'Copied!';
+                setTimeout(() => { copyButton.textContent = 'Copy'; }, 2000);
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+            }
+            document.body.removeChild(tempTextArea);
+        }
+
+        // --- Event Listeners ---
+        jsonFileInput.addEventListener('change', handleJsonFile);
+        packNameInput.addEventListener('input', validateFormState);
+        packDescInput.addEventListener('input', validateFormState);
+        generateButton.addEventListener('click', handleGenerateClick);
+        copyButton.addEventListener('click', copyCommandToClipboard);
+
+        // Initial check in case of page refresh with filled fields (less common in snippets)
+        validateFormState();
+
+    </script>
+</body>
+</html>
