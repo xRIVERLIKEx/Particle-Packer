@@ -26,16 +26,58 @@
         input[type="file"]::file-selector-button:hover {
             background-color: #2D3748; /* gray-700 */
         }
+        
+        /* NEW: Particle Background Styles */
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) scale(var(--scale));
+                opacity: 0;
+            }
+            10%, 90% {
+                opacity: var(--opacity);
+            }
+            100% {
+                transform: translateY(-100vh) scale(var(--scale));
+                opacity: 0;
+            }
+        }
+
+        .particle-bg-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            bottom: -16px; /* Start just below the viewport */
+            width: 16px;
+            height: 16px;
+            /* UPDATED: Using the bubble.png raw URL */
+            background-image: url('https://raw.githubusercontent.com/xRIVERLIKEx/Particle-Packer/main/bubble.png');
+            /* UPDATED: Set background-size to cover since it's a single image */
+            background-size: cover;
+            mix-blend-mode: screen; /* Makes the black background transparent */
+            animation: floatUp linear infinite;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white font-sans p-6 md:p-12">
 
-    <div class="max-w-3xl mx-auto bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-2xl p-8 md:p-10">
+    <!-- NEW: Particle Background Container -->
+    <div id="particle-bg-container" class="particle-bg-container"></div>
+
+    <!-- UPDATED: Added relative and z-10 so it sits on top of the particle background -->
+    <div class="max-w-3xl mx-auto bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-2xl p-8 md:p-10 relative z-10">
         
         <header class="text-center mb-8">
             <img src="https://raw.githubusercontent.com/xRIVERLIKEx/Particle-Packer-v2/main/Cleverlike%20School%20Header%20Image.png" alt="Cleverlike School Header" class="mx-auto mb-6" style="max-height: 90px;">
             
-            <h1 class="text-4xl font-bold text-green-400 mb-2">Particle Pack Generator</h1>
+            <h1 class="text-4xl font-bold text-cyan-400 mb-2">Particle Pack Generator</h1>
             <p class="text-xl text-gray-300">For Minecraft Bedrock & Education</p>
         </header>
 
@@ -68,7 +110,7 @@
                     <label for="pack-icon" class="block text-sm font-medium text-gray-300 mb-2">Upload your own icon:</label>
                     <input type="file" id="pack-icon" accept="image/png" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3">
                     
-                    <p id="pack-icon-feedback" class="text-sm text-green-400 mt-2 hidden"></p>
+                    <p id="pack-icon-feedback" class="text-sm text-cyan-400 mt-2 hidden"></p>
                 </div>
             </section>
 
@@ -85,6 +127,13 @@
                     <label for="json-file-input" class="block text-sm font-medium text-gray-300 mb-2">Select your particle's .json file:</label>
                     <input type="file" id="json-file-input" accept=".json" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3">
                 </div>
+                
+                <!-- *** MOVED HERE: Cancel Button *** -->
+                <div class="mt-4">
+                    <button id="cancel-add-particle-button" class="w-full bg-red-600 hover:bg-red-700 text-white text-lg font-bold py-3 px-6 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105 hidden">
+                        Cancel Adding Particle
+                    </button>
+                </div>
             </section>
 
             <!-- Step 3: Textures --><section id="step-3-textures" class="hidden space-y-6">
@@ -98,7 +147,7 @@
                 </div>
             </section>
 
-            <!-- Step 4: Add Particle Button --><section id="step-add-particle" class="hidden">
+            <!-- Step 4: Add Particle Button --><section id="step-add-particle" class="hidden space-y-4">
                 <button id="add-particle-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold py-3 px-6 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed" disabled>
                     Add Particle to Pack
                 </button>
@@ -109,26 +158,27 @@
                 <button id="add-another-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold py-3 px-6 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105">
                     Add Additional Particles
                 </button>
-                <button id="generate-button" class="w-full bg-green-600 hover:bg-green-700 text-white text-xl font-bold py-4 px-6 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105">
+                <button id="generate-button" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white text-xl font-bold py-4 px-6 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105">
                     Generate Resource Pack (.mcpack)
                 </button>
                 <div id="error-message" class="text-red-400 text-center mt-4 font-medium"></div>
             </section>
 
-            <!-- REMOVED: Old Step 5: Generate --><!-- <section id="step-generate" class="hidden"> ... </section> -->
-
             <!-- Step 6: Download & Command --><section id="step-download" class="hidden space-y-6 text-center">
-                <h2 class="text-3xl font-semibold text-green-400">Resource Pack Generated Successfully!</h2>
+                <h2 class="text-3xl font-semibold text-cyan-400">Resource Pack Generated Successfully!</h2>
                 <p class="text-gray-300">Download the <span class="font-bold">.mcpack</span> file and open it with Minecraft. Make sure to activate the Resource Pack on your world.</p>
                 
-                <!-- UPDATED: Wrapper for two buttons -->
                 <div class="flex flex-col sm:flex-row justify-center gap-4">
                     <a id="download-link" class="inline-block bg-blue-600 hover:bg-blue-700 text-white text-xl font-bold py-4 px-8 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105">
                         Download .mcpack
                     </a>
-                    <!-- ADDED: PDF Download Button -->
-                    <a id="download-pdf-link" class="inline-block bg-gray-600 hover:bg-gray-700 text-white text-xl font-bold py-4 px-8 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105 hidden">
-                        Download PDF Docs
+                    <!-- UPDATED: Button text, color, and icon added -->
+                    <a id="download-pdf-link" class="inline-flex items-center justify-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-xl font-bold py-4 px-8 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105 hidden">
+                        <!-- File Icon SVG -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
+                        </svg>
+                        <span>Download PDF Doc</span>
                     </a>
                 </div>
 
@@ -136,7 +186,7 @@
                     <h3 classs="text-xl font-semibold mb-2">Your Particle Commands:</h3>
                     <p class="text-gray-400 mb-2">Use these commands in-game to spawn your particles. Click to copy.</p>
                     <div class="bg-gray-900 rounded-lg p-4 text-left relative">
-                        <pre><code id="command-text" class="text-green-300 whitespace-pre-wrap font-mono"></code></pre>
+                        <pre><code id="command-text" class="text-cyan-300 whitespace-pre-wrap font-mono"></code></pre>
                         <button id="copy-button" title="Copy to clipboard" class="absolute top-3 right-3 bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded-md text-sm font-medium transition">
                             Copy
                         </button>
@@ -160,11 +210,9 @@
         let currentRequiredTextures = new Set();
         let currentNewTexturesToUpload = new Set();
 
-        // --- ADDED: Map to store built-in wand data ---
         const builtInWandBlobs = new Map();
         const wandIconSelectionContainer = document.getElementById('wand-icon-selection-container');
         
-        // ADDED: Define the wand filenames and their IDs
         const wandFiles = new Map([
             ['wand_yellow', 'https://raw.githubusercontent.com/xRIVERLIKEx/Particle-Packer-v2/main/wand.png'],
             ['wand_red', 'https://raw.githubusercontent.com/xRIVERLIKEx/Particle-Packer-v2/main/wand2.png'],
@@ -194,21 +242,36 @@
         
         const stepAddParticle = document.getElementById('step-add-particle');
         const addParticleButton = document.getElementById('add-particle-button');
+        const cancelAddParticleButton = document.getElementById('cancel-add-particle-button'); // MOVED
         
-        // UPDATED: Point to new section
         const stepChoiceSection = document.getElementById('step-choice');
         const addAnotherButton = document.getElementById('add-another-button');
-        const generateButton = document.getElementById('generate-button'); // This button is now in 'step-choice'
-        const errorMessage = document.getElementById('error-message'); // This div is now in 'step-choice'
+        const generateButton = document.getElementById('generate-button');
+        const errorMessage = document.getElementById('error-message');
         
         const stepDownload = document.getElementById('step-download');
         const downloadLink = document.getElementById('download-link');
-        const downloadPdfLink = document.getElementById('download-pdf-link'); // ADDED
+        const downloadPdfLink = document.getElementById('download-pdf-link');
         const commandText = document.getElementById('command-text');
         const copyButton = document.getElementById('copy-button');
 
         // --- Helper Functions ---
         
+        /**
+         * NEW: Helper function to smoothly scroll to an element
+         */
+        function scrollToElement(element) {
+            if (element && !element.classList.contains('hidden')) {
+                // A slight delay to ensure the element is rendered before scrolling
+                setTimeout(() => {
+                    element.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start' 
+                    });
+                }, 100); // 100ms delay
+            }
+        }
+
         function generateUUID() {
             return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
                 var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -216,9 +279,6 @@
             });
         }
 
-        /**
-         * UPDATED: Handles pack icon file upload
-         */
         function handlePackIconUpload(event) {
             const file = event.target.files[0];
             if (file) {
@@ -226,16 +286,12 @@
                 packIconFeedback.textContent = `✅ Icon selected: ${file.name}`;
                 packIconFeedback.classList.remove('hidden');
                 
-                // Deselect any wands
                 const allButtons = wandIconSelectionContainer.querySelectorAll('button');
                 allButtons.forEach(btn => btn.classList.remove('border-blue-500', 'ring-2', 'ring-blue-500'));
             }
-            validatePackState(); // Check if Step 1 is complete
+            validatePackState();
         }
 
-        /**
-         * ADDED: Handles wand icon selection
-         */
         function handleWandIconSelection(event) {
             const selectedButton = event.currentTarget;
             const wandId = selectedButton.dataset.wandId;
@@ -244,13 +300,13 @@
             allButtons.forEach(btn => btn.classList.remove('border-blue-500', 'ring-2', 'ring-blue-500'));
             selectedButton.classList.add('border-blue-500', 'ring-2', 'ring-blue-500');
 
-            packIconFile = builtInWandBlobs.get(wandId); // Set the icon file to the pre-loaded blob
+            packIconFile = builtInWandBlobs.get(wandId);
 
             packIconFeedback.textContent = `✅ ${wandId} selected as icon.`;
             packIconFeedback.classList.remove('hidden');
-            packIconInput.value = ''; // Clear file input
+            packIconInput.value = '';
             
-            validatePackState(); // Check if Step 1 is complete
+            validatePackState();
         }
 
         function showError(message) {
@@ -275,33 +331,26 @@
                 addParticleButton.disabled = false;
                 errorMessage.textContent = '';
                 stepAddParticle.classList.remove('hidden');
+                scrollToElement(stepAddParticle); // ADDED
             } else {
                 addParticleButton.disabled = true;
                 stepAddParticle.classList.add('hidden');
             }
         }
 
-        /**
-         * UPDATED: This function now also controls the visibility of Step 2
-         * and checks for a pack icon.
-         */
         function validatePackState() {
             const nameValid = packNameInput.value.trim() !== '';
             const descValid = packDescInput.value.trim() !== '';
-            const iconValid = packIconFile !== null; // NOW REQUIRED
+            const iconValid = packIconFile !== null;
             
-            // Control Step 2
             if (nameValid && descValid && iconValid) {
-                // Only show Step 2 if no particles have been added yet,
-                // otherwise, the choice buttons should be showing.
                 if (particleQueue.length === 0) {
                     step2Section.classList.remove('hidden');
+                    scrollToElement(step2Section); // ADDED
                 }
             } else {
                 step2Section.classList.add('hidden');
             }
-
-            // REMOVED: Generate Button logic removed from here
         }
 
         function handleJsonFile(event) {
@@ -360,6 +409,7 @@
 
                     renderTextureInputs();
                     step3Section.classList.remove('hidden');
+                    scrollToElement(step3Section); // ADDED
                     validateCurrentParticleState();
 
                 } catch (err) {
@@ -406,12 +456,12 @@
                         if (file) {
                             allUploadedTextures.set(path, file);
                             label.textContent = `✅ ${path} (Uploaded: ${file.name})`;
-                            label.classList.add('text-green-400');
+                            label.classList.add('text-cyan-400');
                             currentNewTexturesToUpload.delete(path);
                         } else {
                             allUploadedTextures.delete(path);
                             label.textContent = `Required Path: ${path}`;
-                            label.classList.remove('text-green-400');
+                            label.classList.remove('text-cyan-400');
                             currentNewTexturesToUpload.add(path);
                         }
                         validateCurrentParticleState();
@@ -439,11 +489,8 @@
             addParticleButton.disabled = true;
         }
 
-        /**
-         * UPDATED: Renders the file card grid
-         */
         function updateParticleListUI() {
-            particleListContainer.innerHTML = ''; // Clear the grid
+            particleListContainer.innerHTML = '';
             if (particleQueue.length === 0) {
                 particleListSection.classList.add('hidden');
                 return;
@@ -460,11 +507,10 @@
                     const img = document.createElement('img');
                     img.className = "w-full h-full object-cover";
                     img.src = URL.createObjectURL(particle.firstTextureFile);
-                    img.onload = () => { URL.revokeObjectURL(img.src); } // Clean up blob URL
+                    img.onload = () => { URL.revokeObjectURL(img.src); }
                     imgContainer.innerHTML = '';
                     imgContainer.appendChild(img);
                 } else {
-                    // Fallback file icon (SVG)
                     imgContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
                     </svg>`;
@@ -481,13 +527,9 @@
             particleListSection.classList.remove('hidden');
         }
 
-        /**
-         * UPDATED: Now saves the first texture file
-         */
         function handleAddParticleClick() {
             if (addParticleButton.disabled || !currentJson) return; 
 
-            // Find the first texture file, if one exists
             let firstTextureFile = null;
             if (currentRequiredTextures.size > 0) {
                 const firstTexturePath = currentRequiredTextures.values().next().value;
@@ -498,17 +540,18 @@
                 json: currentJson,
                 originalFileName: currentOriginalFileName,
                 identifier: currentIdentifier,
-                firstTextureFile: firstTextureFile // Add the file to the queue item
+                firstTextureFile: firstTextureFile
             });
 
             updateParticleListUI();
             resetCurrentParticle();
             
-            // UPDATED: Hide upload steps and show choice buttons
             step2Section.classList.add('hidden');
             step3Section.classList.add('hidden');
             stepAddParticle.classList.add('hidden');
+            cancelAddParticleButton.classList.add('hidden'); // Hide cancel button on success
             stepChoiceSection.classList.remove('hidden');
+            scrollToElement(stepChoiceSection); // ADDED
         }
 
         function createRPManifest(name, desc, rp_uuid, rp_module_uuid) {
@@ -531,9 +574,6 @@
             };
         }
 
-        /**
-         * UPDATED: Includes PDF generation logic with header
-         */
         async function handleGenerateClick() {
             if (particleQueue.length === 0) {
                 showError("Please add at least one particle.");
@@ -584,12 +624,10 @@
                 commands += particleQueue.map(p => `/particle ${p.identifier} ~ ~ ~`).join('\n');
                 commandText.textContent = commands;
 
-                // --- ADDED: PDF Generation Logic with Header ---
                 try {
                     const { jsPDF } = window.jspdf;
                     const doc = new jsPDF();
                     
-                    // --- NEW: Load header image ---
                     const headerImgUrl = 'https://raw.githubusercontent.com/xRIVERLIKEx/Particle-Packer-v2/main/Cleverlike%20School%20Header%20Image.png';
                     const response = await fetch(headerImgUrl);
                     const headerImgBlob = await response.blob();
@@ -600,24 +638,20 @@
                         reader.readAsDataURL(headerImgBlob);
                     });
 
-                    // --- NEW: Add Header Image & Title ---
-                    // Dimensions of the original image are 1032x242, aspect ratio ~4.26
                     const imgWidth = 50;
                     const imgHeight = imgWidth / 4.26;
                     doc.addImage(headerImgData, 'PNG', 20, 15, imgWidth, imgHeight);
                     
                     doc.setFontSize(22);
                     doc.text("Particle Packer", 20 + imgWidth + 10, 35);
-                    // --- END NEW HEADER ---
 
-                    let y = 60; // Adjusted Y position to be below header
+                    let y = 60;
                     doc.setFontSize(14);
                     doc.setFont("helvetica", "bold");
                     
                     particleQueue.forEach(particle => {
-                        if (y > 270) { // Simple page break
+                        if (y > 270) {
                             doc.addPage();
-                            // Re-add header on new page
                             doc.addImage(headerImgData, 'PNG', 20, 15, imgWidth, imgHeight);
                             doc.setFontSize(22);
                             doc.text("Particle Packer", 20 + imgWidth + 10, 35);
@@ -636,7 +670,7 @@
                         doc.setFont("courier", "normal");
                         doc.text(particleCommand, 20, y + 7);
                         
-                        y += 20; // Move down for the next entry
+                        y += 20;
                     });
 
                     const pdfBlob = doc.output('blob');
@@ -650,10 +684,10 @@
                     console.error("Failed to generate PDF:", pdfErr);
                     downloadPdfLink.classList.add('hidden');
                 }
-                // --- END PDF Logic ---
                 
                 stepDownload.classList.remove('hidden');
-                stepChoiceSection.classList.add('hidden'); // Hide choice buttons on success
+                stepChoiceSection.classList.add('hidden');
+                scrollToElement(stepDownload); // ADDED
 
             } catch (err) {
                 showError(`Failed to generate pack: ${err.message}`);
@@ -676,30 +710,72 @@
             document.body.removeChild(tempTextArea);
         }
 
+        /**
+         * NEW: Creates the animated particle background
+         */
+        function createParticleBackground() {
+            const container = document.getElementById('particle-bg-container');
+            if (!container) return; // Exit if container not found
+            
+            // UPDATED: Increased particle count
+            const particleCount = 45;
+            // UPDATED: Removed spritePositions, as we are using a single bubble image
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('span');
+                particle.className = 'particle';
+                
+                const xPos = Math.random() * 100;
+                const animDuration = Math.random() * 15 + 10; // 10s to 25s
+                const animDelay = Math.random() * 15; // 0s to 15s delay
+                const opacity = Math.random() * 0.6 + 0.2; // 0.2 to 0.8
+                // UPDATED: Increased scale
+                const scale = Math.random() * 0.8 + 0.8; // Was 0.8 + 0.5, now 0.8 + 0.8 (range 0.8 to 1.6)
+                // UPDATED: Removed sprite logic
+
+                particle.style.left = `${xPos}vw`;
+                particle.style.animationDuration = `${animDuration}s`;
+                particle.style.animationDelay = `${animDelay}s`;
+                particle.style.setProperty('--opacity', opacity);
+                particle.style.setProperty('--scale', scale);
+                // UPDATED: Removed backgroundPosition setting
+                
+                container.appendChild(particle);
+            }
+        }
+
         // --- Event Listeners ---
         jsonFileInput.addEventListener('change', handleJsonFile);
         packNameInput.addEventListener('input', validatePackState);
         packDescInput.addEventListener('input', validatePackState);
-        packIconInput.addEventListener('change', handlePackIconUpload); // Now calls validate
+        packIconInput.addEventListener('change', handlePackIconUpload);
         
         addParticleButton.addEventListener('click', handleAddParticleClick);
         generateButton.addEventListener('click', handleGenerateClick);
         copyButton.addEventListener('click', copyCommandToClipboard);
 
-        // ADDED: Event listener for 'Add Another' button
         addAnotherButton.addEventListener('click', () => {
-            stepChoiceSection.classList.add('hidden'); // Hide choices
-            step2Section.classList.remove('hidden'); // Show Step 2
-            jsonFileInput.value = ''; // Clear file input
+            stepChoiceSection.classList.add('hidden');
+            step2Section.classList.remove('hidden');
+            scrollToElement(step2Section); // ADDED
+            cancelAddParticleButton.classList.remove('hidden'); // Show cancel button
+            jsonFileInput.value = '';
 
-            // UPDATED: Change titles for subsequent particles
             step2Title.textContent = "Upload Additional .json File";
             step3Title.textContent = "Upload Additional Textures";
         });
         
-        /**
-         * ADDED: Renders the wand icon selection grid
-         */
+        cancelAddParticleButton.addEventListener('click', () => {
+            resetCurrentParticle();
+            step2Section.classList.add('hidden');
+            step3Section.classList.add('hidden');
+            stepAddParticle.classList.add('hidden');
+            cancelAddParticleButton.classList.add('hidden'); // Hide itself
+            
+            stepChoiceSection.classList.remove('hidden'); // Show choices again
+            scrollToElement(stepChoiceSection); // ADDED
+        });
+        
         function renderWandIconSelector() {
             wandIconSelectionContainer.innerHTML = '';
             
@@ -723,15 +799,11 @@
             }
         }
 
-        /**
-         * MODIFIED: init now fetches wand icons
-         */
         async function init() {
             try {
-                // Fetch wand icons for the icon selector
                 for (const [id, filename] of wandFiles.entries()) {
-                    // Use the full raw URL
-                    const response = await fetch(new URL(filename, document.baseURI).href);
+                    // Use the full URL directly
+                    const response = await fetch(new URL(filename).href);
                     if (!response.ok) {
                         throw new Error(`Failed to load ${filename}`);
                     }
@@ -739,7 +811,6 @@
                     builtInWandBlobs.set(id, blob);
                 }
                 
-                // Render the icon grid
                 renderWandIconSelector();
 
             } catch (e) {
@@ -747,12 +818,11 @@
                 showError(`Error: Failed to load wand images from GitHub. [${e.message}]`);
             }
             
-            // Validate initial state
             validatePackState();
             validateCurrentParticleState();
+            createParticleBackground(); // NEW: Call the function
         }
 
-        // Run init on page load
         init();
 
     </script>
