@@ -64,6 +64,32 @@
             mix-blend-mode: screen; /* Makes the black background transparent */
             animation: floatUp linear infinite;
         }
+
+        /* NEW: Confetti Styles */
+        @keyframes confetti-explode {
+            0% {
+                opacity: 1;
+                transform: translateY(0) rotate(0deg) scale(1);
+            }
+            100% {
+                opacity: 0;
+                /* UPDATED: Explode up and out to random X and Y positions */
+                transform: translateY(var(--y-end)) translateX(var(--x-end)) rotate(360deg) scale(0.5);
+            }
+        }
+        .confetti-particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: var(--color);
+            opacity: 0;
+            /* UPDATED: Use new animation */
+            animation: confetti-explode ease-out forwards;
+            /* UPDATED: Random duration for each particle */
+            animation-duration: var(--duration);
+            /* NEW: Center the particle on its origin point */
+            transform-origin: center;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white font-sans p-6 md:p-12">
@@ -72,7 +98,7 @@
     <div id="particle-bg-container" class="particle-bg-container"></div>
 
     <!-- UPDATED: Added relative and z-10 so it sits on top of the particle background -->
-    <div class="max-w-3xl mx-auto bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-2xl p-8 md:p-10 relative z-10">
+    <div class="max-w-3xl mx-auto bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-2xl p-8 md:p-10 relative z-10" id="main-content-card">
         
         <header class="text-center mb-8">
             <img src="https://raw.githubusercontent.com/xRIVERLIKEx/Particle-Packer-v2/main/Cleverlike%20School%20Header%20Image.png" alt="Cleverlike School Header" class="mx-auto mb-6" style="max-height: 90px;">
@@ -84,7 +110,15 @@
         <div class="space-y-8">
 
             <!-- Step 1: Pack Details --><section id="step-1" class="space-y-4">
-                <h2 class="text-2xl font-semibold border-b-2 border-gray-700 pb-2">Step 1: Pack Details</h2>
+                <!-- UPDATED: Added a span for the checkmark -->
+                <h2 class="text-2xl font-semibold border-b-2 border-gray-700 pb-2 flex justify-between items-center">
+                    <span>Step 1: Pack Details</span>
+                    <span id="step-1-check" class="text-cyan-400 hidden">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                    </span>
+                </h2>
                 <div>
                     <label for="pack-name" class="block text-sm font-medium text-gray-300 mb-2">Pack Name (Required)</label>
                     <input type="text" id="pack-name" placeholder="e.g., My Awesome Particles" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
@@ -122,7 +156,15 @@
             </section>
 
             <!-- Step 2: Snowstorm File --><section id="step-2-json" class="space-y-4 hidden">
-                <h2 class="text-2xl font-semibold border-b-2 border-gray-700 pb-2">Step 2: Upload Snowstorm .json File</h2>
+                <!-- UPDATED: Added a span for the checkmark -->
+                <h2 class="text-2xl font-semibold border-b-2 border-gray-700 pb-2 flex justify-between items-center">
+                    <span id="step-2-title-text">Step 2: Upload Snowstorm .json File</span>
+                    <span id="step-2-check" class="text-cyan-400 hidden">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                    </span>
+                </h2>
                 <div>
                     <label for="json-file-input" class="block text-sm font-medium text-gray-300 mb-2">Select your particle's .json file:</label>
                     <input type="file" id="json-file-input" accept=".json" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3">
@@ -137,7 +179,15 @@
             </section>
 
             <!-- Step 3: Textures --><section id="step-3-textures" class="hidden space-y-6">
-                <h2 class="text-2xl font-semibold border-b-2 border-gray-700 pb-2">Step 3: Upload Textures</h2>
+                <!-- UPDATED: Added a span for the checkmark -->
+                <h2 class="text-2xl font-semibold border-b-2 border-gray-700 pb-2 flex justify-between items-center">
+                    <span id="step-3-title-text">Step 3: Upload Textures</span>
+                    <span id="step-3-check" class="text-cyan-400 hidden">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                    </span>
+                </h2>
                 
                 <div>
                     <h3 class="text-lg font-semibold text-gray-200">Particle Textures</h3>
@@ -235,10 +285,15 @@
         const particleListContainer = document.getElementById('particle-list-container');
         
         const step2Section = document.getElementById('step-2-json'); 
-        const step2Title = document.querySelector('#step-2-json h2');
+        const step2Title = document.getElementById('step-2-title-text'); // UPDATED
         const step3Section = document.getElementById('step-3-textures'); 
-        const step3Title = document.querySelector('#step-3-textures h2');
+        const step3Title = document.getElementById('step-3-title-text'); // UPDATED
         const textureUploadsContainer = document.getElementById('texture-uploads-container');
+        
+        // NEW: Checkmark elements
+        const step1Check = document.getElementById('step-1-check');
+        const step2Check = document.getElementById('step-2-check');
+        const step3Check = document.getElementById('step-3-check');
         
         const stepAddParticle = document.getElementById('step-add-particle');
         const addParticleButton = document.getElementById('add-particle-button');
@@ -331,10 +386,12 @@
                 addParticleButton.disabled = false;
                 errorMessage.textContent = '';
                 stepAddParticle.classList.remove('hidden');
+                step3Check.classList.remove('hidden'); // NEW: Show check for step 3
                 scrollToElement(stepAddParticle); // ADDED
             } else {
                 addParticleButton.disabled = true;
                 stepAddParticle.classList.add('hidden');
+                step3Check.classList.add('hidden'); // NEW: Hide check
             }
         }
 
@@ -344,11 +401,13 @@
             const iconValid = packIconFile !== null;
             
             if (nameValid && descValid && iconValid) {
+                step1Check.classList.remove('hidden'); // NEW: Show check for step 1
                 if (particleQueue.length === 0) {
                     step2Section.classList.remove('hidden');
                     scrollToElement(step2Section); // ADDED
                 }
             } else {
+                step1Check.classList.add('hidden'); // NEW: Hide check
                 step2Section.classList.add('hidden');
             }
         }
@@ -400,7 +459,10 @@
 
                     currentJson = JSON.parse(modifiedJsonString);
 
-                    currentNewTexturesToUpload.clear();
+                    // UPDATED: Fix logic bug
+                    // Was looping over currentNewTexturesToUpload (which was empty)
+                    // Now loops over currentRequiredTextures (which has the textures)
+                    currentNewTexturesToUpload.clear(); // Ensure it's empty
                     currentRequiredTextures.forEach(path => {
                         if (!allUploadedTextures.has(path)) {
                             currentNewTexturesToUpload.add(path);
@@ -409,6 +471,7 @@
 
                     renderTextureInputs();
                     step3Section.classList.remove('hidden');
+                    step2Check.classList.remove('hidden'); // NEW: Show check for step 2
                     scrollToElement(step3Section); // ADDED
                     validateCurrentParticleState();
 
@@ -487,6 +550,10 @@
             
             stepAddParticle.classList.add('hidden');
             addParticleButton.disabled = true;
+
+            // NEW: Hide checkmarks for reset steps
+            step2Check.classList.add('hidden');
+            step3Check.classList.add('hidden');
         }
 
         function updateParticleListUI() {
@@ -685,6 +752,9 @@
                     downloadPdfLink.classList.add('hidden');
                 }
                 
+                // --- NEW: Trigger Confetti ---
+                triggerConfetti(); 
+                
                 stepDownload.classList.remove('hidden');
                 stepChoiceSection.classList.add('hidden');
                 scrollToElement(stepDownload); // ADDED
@@ -708,6 +778,57 @@
                 showError('Failed to copy commands.');
             }
             document.body.removeChild(tempTextArea);
+        }
+
+        /**
+         * NEW: Creates a burst of confetti
+         */
+        function triggerConfetti() {
+            const container = document.getElementById('main-content-card'); // Burst from the main card
+            const button = document.getElementById('generate-button'); // The button to burst from
+            if (!container || !button) return;
+
+            // Get button position relative to the card
+            const buttonRect = button.getBoundingClientRect();
+            const cardRect = container.getBoundingClientRect();
+            
+            const startX = buttonRect.left - cardRect.left + (buttonRect.width / 2);
+            const startY = buttonRect.top - cardRect.top; // Erupt from the top edge of the button
+
+            const particleCount = 100;
+            const colors = ['#22d3ee', '#06b6d4', '#0891b2', '#f0f9ff', '#e0f2fe']; // Cyan and white colors
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'confetti-particle';
+                
+                // Horizontal spread from -150px to +150px
+                const xEnd = (Math.random() - 0.5) * 300; 
+                // UPDATED: Random vertical spread from -100px to -250px
+                const yEnd = (Math.random() * -150) - 100;
+                // UPDATED: Random duration
+                const duration = (Math.random() * 1) + 1.5; // 1.5s to 2.5s
+                
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                
+                particle.style.setProperty('--color', color);
+                particle.style.setProperty('--x-end', `${xEnd}px`);
+                // NEW: Set random Y end
+                particle.style.setProperty('--y-end', `${yEnd}px`);
+                // NEW: Set random duration
+                particle.style.setProperty('--duration', `${duration}s`);
+                
+                // UPDATED: Set start position to the button
+                particle.style.left = `${startX}px`;
+                particle.style.top = `${startY}px`;
+                
+                // Remove particle from DOM after animation
+                particle.addEventListener('animationend', () => {
+                    particle.remove();
+                });
+
+                container.appendChild(particle);
+            }
         }
 
         /**
@@ -761,8 +882,11 @@
             cancelAddParticleButton.classList.remove('hidden'); // Show cancel button
             jsonFileInput.value = '';
 
+            // NEW: Reset titles but keep checkmarks hidden
             step2Title.textContent = "Upload Additional .json File";
             step3Title.textContent = "Upload Additional Textures";
+            step2Check.classList.add('hidden');
+            step3Check.classList.add('hidden');
         });
         
         cancelAddParticleButton.addEventListener('click', () => {
@@ -771,6 +895,10 @@
             step3Section.classList.add('hidden');
             stepAddParticle.classList.add('hidden');
             cancelAddParticleButton.classList.add('hidden'); // Hide itself
+            
+            // NEW: Hide checkmarks on cancel
+            step2Check.classList.add('hidden');
+            step3Check.classList.add('hidden');
             
             stepChoiceSection.classList.remove('hidden'); // Show choices again
             scrollToElement(stepChoiceSection); // ADDED
