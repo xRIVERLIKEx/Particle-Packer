@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -112,8 +114,12 @@
     <!-- NEW: Particle Background Container -->
     <div id="particle-bg-container" class="particle-bg-container"></div>
 
-    <!-- UPDATED: Added relative and z-10 so it sits on top of the particle background -->
-    <div class="max-w-3xl mx-auto bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-2xl p-8 md:p-10 relative z-10" id="main-content-card">
+    <!-- 
+      UPDATED: 
+      - Changed max-w-3xl to max-w-6xl to widen the page
+      - Added relative and z-10 so it sits on top of the particle background 
+    -->
+    <div class="max-w-6xl mx-auto bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-2xl p-8 md:p-10 relative z-10" id="main-content-card">
         
         <header class="text-center mb-8">
             <img src="https://raw.githubusercontent.com/xRIVERLIKEx/Particle-Packer-v2/main/Cleverlike%20School%20Header%20Image.png" alt="Cleverlike School Header" class="mx-auto mb-6" style="max-height: 90px;">
@@ -122,6 +128,29 @@
             <h1 class="text-5xl font-pixel text-cyan-500 mb-2 tracking-wide">PARTICLE PACKER</h1>
             <p class="text-2xl text-gray-300 font-pixel tracking-wide">For Minecraft Bedrock & Education</p>
         </header>
+        
+        <!-- NEW: Snowstorm Embed Section -->
+        <section id="snowstorm-embed-section" class="mb-8 bg-gray-700 p-4 rounded-lg">
+            <button id="toggle-snowstorm-embed" class="w-full text-left text-2xl font-semibold flex justify-between items-center transition-colors duration-200 hover:text-cyan-400">
+                <span>Snowstorm Particle Editor</span>
+                <svg id="snowstorm-chevron" class="h-6 w-6 transform transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+            <!-- 
+              UPDATED: 
+              - Changed aspect-video to aspect-[16/10] for a better editor fit
+            -->
+            <div id="snowstorm-iframe-container" class="hidden mt-4 aspect-[16/10] w-full rounded-lg overflow-hidden border-2 border-gray-600">
+                <!-- 
+                  UPDATED: 
+                  - Added allow attribute to help with clipboard and other features
+                -->
+                <iframe id="snowstorm-iframe" src="https://snowstorm.app/" class="w-full h-full" title="Snowstorm Particle Editor" allow="clipboard-read; clipboard-write; fullscreen"></iframe>
+            </div>
+            <p class="text-sm text-gray-400 mt-2">Click to expand the particle editor. Note: This is an embed of the external <a href="https://snowstorm.app/" target="_blank" class="text-cyan-400 hover:underline">snowstorm.app</a> website and may not load if they block embedding.</p>
+        </section>
+        <!-- END: Snowstorm Embed Section -->
 
         <div class="space-y-8">
 
@@ -339,6 +368,12 @@
         const downloadPdfLink = document.getElementById('download-pdf-link');
         const commandText = document.getElementById('command-text');
         const copyButton = document.getElementById('copy-button');
+
+        // NEW: Snowstorm Embed Elements
+        const toggleSnowstormEmbed = document.getElementById('toggle-snowstorm-embed');
+        const snowstormIframeContainer = document.getElementById('snowstorm-iframe-container');
+        const snowstormChevron = document.getElementById('snowstorm-chevron');
+
 
         // --- Helper Functions ---
         
@@ -934,6 +969,17 @@
             
             stepChoiceSection.classList.remove('hidden'); // Show choices again
             scrollToElement(stepChoiceSection); // ADDED
+        });
+
+        // NEW: Event Listener for Snowstorm Toggle
+        toggleSnowstormEmbed.addEventListener('click', () => {
+            const isHidden = snowstormIframeContainer.classList.toggle('hidden');
+            if (isHidden) {
+                snowstormChevron.classList.remove('rotate-180');
+            } else {
+                snowstormChevron.classList.add('rotate-180');
+                scrollToElement(snowstormIframeContainer); // Scroll to it when opened
+            }
         });
         
         function renderWandIconSelector() {
