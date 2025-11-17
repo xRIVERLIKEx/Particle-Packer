@@ -1,13 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Particle Pack Generator</title>
+    <!-- UPDATED: Changed the title -->
+    <title>PARTICLE PACKER</title>
     <!-- Load Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
+    <!-- ADDED: Configure Tailwind to add custom font -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        /* UPDATED: Changed the font definition */
+                        'pixel': ['Silkscreen', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
     <!-- Load JSZip library for creating zip files --><script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <!-- ADDED: Load jsPDF library for PDF generation --><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
+        /* UPDATED: Import the 'Silkscreen' font instead of 'VT323' */
+        @import url('https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap');
+        
         body {
             /* Background GIF removed */
         }
@@ -103,17 +118,20 @@
         <header class="text-center mb-8">
             <img src="https://raw.githubusercontent.com/xRIVERLIKEx/Particle-Packer-v2/main/Cleverlike%20School%20Header%20Image.png" alt="Cleverlike School Header" class="mx-auto mb-6" style="max-height: 90px;">
             
-            <h1 class="text-4xl font-bold text-cyan-400 mb-2">Particle Pack Generator</h1>
-            <p class="text-xl text-gray-300">For Minecraft Bedrock & Education</p>
+            <!-- UPDATED: Added tracking-wide for letter spacing -->
+            <h1 class="text-5xl font-pixel text-cyan-500 mb-2 tracking-wide">PARTICLE PACKER</h1>
+            <!-- UPDATED: Added tracking-wide for letter spacing -->
+            <p class="text-2xl text-gray-300 font-pixel tracking-wide">For Minecraft Bedrock & Education</p>
         </header>
 
         <div class="space-y-8">
 
             <!-- Step 1: Pack Details --><section id="step-1" class="space-y-4">
-                <!-- UPDATED: Added a span for the checkmark -->
-                <h2 class="text-2xl font-semibold border-b-2 border-gray-700 pb-2 flex justify-between items-center">
+                <!-- UPDATED: Added tracking-wide for letter spacing -->
+                <h2 class="text-3xl font-pixel border-b-2 border-gray-700 pb-2 flex justify-between items-center tracking-wide">
                     <span>Step 1: Pack Details</span>
-                    <span id="step-1-check" class="text-cyan-400 hidden">
+                    <!-- UPDATED: Changed text-cyan-400 to text-cyan-500 -->
+                    <span id="step-1-check" class="text-cyan-500 hidden">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                         </svg>
@@ -144,22 +162,25 @@
                     <label for="pack-icon" class="block text-sm font-medium text-gray-300 mb-2">Upload your own icon:</label>
                     <input type="file" id="pack-icon" accept="image/png" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3">
                     
-                    <p id="pack-icon-feedback" class="text-sm text-cyan-400 mt-2 hidden"></p>
+                    <!-- UPDATED: Changed text-cyan-400 to text-cyan-500 -->
+                    <p id="pack-icon-feedback" class="text-sm text-cyan-500 mt-2 hidden"></p>
                 </div>
             </section>
 
             <!-- List of Added Particles --><section id="particle-list-section" class="hidden">
-                <h2 class="text-2xl font-semibold border-b-2 border-gray-700 pb-2 mb-4">Added Particles</h2>
+                <!-- UPDATED: Added tracking-wide for letter spacing -->
+                <h2 class="text-3xl font-pixel border-b-2 border-gray-700 pb-2 mb-4 tracking-wide">Added Particles</h2>
                 <!-- UPDATED: This is now a grid -->
                 <div id="particle-list-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 bg-gray-700 p-4 rounded-lg">
                     <!-- Added particles will be shown as cards here --></div>
             </section>
 
             <!-- Step 2: Snowstorm File --><section id="step-2-json" class="space-y-4 hidden">
-                <!-- UPDATED: Added a span for the checkmark -->
-                <h2 class="text-2xl font-semibold border-b-2 border-gray-700 pb-2 flex justify-between items-center">
+                <!-- UPDATED: Added tracking-wide for letter spacing -->
+                <h2 class="text-3xl font-pixel border-b-2 border-gray-700 pb-2 flex justify-between items-center tracking-wide">
                     <span id="step-2-title-text">Step 2: Upload Snowstorm .json File</span>
-                    <span id="step-2-check" class="text-cyan-400 hidden">
+                    <!-- UPDATED: Changed text-cyan-400 to text-cyan-500 -->
+                    <span id="step-2-check" class="text-cyan-500 hidden">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                         </svg>
@@ -172,17 +193,19 @@
                 
                 <!-- *** MOVED HERE: Cancel Button *** -->
                 <div class="mt-4">
-                    <button id="cancel-add-particle-button" class="w-full bg-red-600 hover:bg-red-700 text-white text-lg font-bold py-3 px-6 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105 hidden">
+                    <!-- UPDATED: Added tracking-wide for letter spacing -->
+                    <button id="cancel-add-particle-button" class="w-full bg-red-600 hover:bg-red-700 text-white text-2xl font-pixel py-3 px-6 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105 hidden tracking-wide">
                         Cancel Adding Particle
                     </button>
                 </div>
             </section>
 
             <!-- Step 3: Textures --><section id="step-3-textures" class="hidden space-y-6">
-                <!-- UPDATED: Added a span for the checkmark -->
-                <h2 class="text-2xl font-semibold border-b-2 border-gray-700 pb-2 flex justify-between items-center">
+                <!-- UPDATED: Added tracking-wide for letter spacing -->
+                <h2 class="text-3xl font-pixel border-b-2 border-gray-700 pb-2 flex justify-between items-center tracking-wide">
                     <span id="step-3-title-text">Step 3: Upload Textures</span>
-                    <span id="step-3-check" class="text-cyan-400 hidden">
+                    <!-- UPDATED: Changed text-cyan-400 to text-cyan-500 -->
+                    <span id="step-3-check" class="text-cyan-500 hidden">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                         </svg>
@@ -190,7 +213,8 @@
                 </h2>
                 
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-200">Particle Textures</h3>
+                    <!-- UPDATED: Added tracking-wide for letter spacing -->
+                    <h3 class="text-2xl font-pixel text-gray-200 tracking-wide">Particle Textures</h3>
                     <p class="text-gray-400">The app detected the following textures are needed for the particle itself.</p>
                     <div id="texture-uploads-container" class="space-y-5 bg-gray-700 p-6 rounded-lg mt-3">
                         <!-- Texture inputs will be added here by JS --></div>
@@ -198,32 +222,37 @@
             </section>
 
             <!-- Step 4: Add Particle Button --><section id="step-add-particle" class="hidden space-y-4">
-                <button id="add-particle-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold py-3 px-6 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed" disabled>
+                <!-- UPDATED: Added tracking-wide for letter spacing -->
+                <button id="add-particle-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-2xl font-pixel py-3 px-6 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed tracking-wide" disabled>
                     Add Particle to Pack
                 </button>
             </section>
 
             <!-- NEW: Step 5: Choice -->
             <section id="step-choice" class="hidden space-y-4 pt-4">
-                <button id="add-another-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold py-3 px-6 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105">
+                <!-- UPDATED: Added tracking-wide for letter spacing -->
+                <button id="add-another-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-2xl font-pixel py-3 px-6 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105 tracking-wide">
                     Add Additional Particles
                 </button>
-                <button id="generate-button" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white text-xl font-bold py-4 px-6 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105">
+                <!-- UPDATED: Added tracking-wide for letter spacing -->
+                <button id="generate-button" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white text-2xl font-pixel py-4 px-6 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105 tracking-wide">
                     Generate Resource Pack (.mcpack)
                 </button>
                 <div id="error-message" class="text-red-400 text-center mt-4 font-medium"></div>
             </section>
 
             <!-- Step 6: Download & Command --><section id="step-download" class="hidden space-y-6 text-center">
-                <h2 class="text-3xl font-semibold text-cyan-400">Resource Pack Generated Successfully!</h2>
+                <!-- UPDATED: Added tracking-wide for letter spacing -->
+                <h2 class="text-4xl font-pixel text-cyan-500 tracking-wide">Resource Pack Generated Successfully!</h2>
                 <p class="text-gray-300">Download the <span class="font-bold">.mcpack</span> file and open it with Minecraft. Make sure to activate the Resource Pack on your world.</p>
                 
                 <div class="flex flex-col sm:flex-row justify-center gap-4">
-                    <a id="download-link" class="inline-block bg-blue-600 hover:bg-blue-700 text-white text-xl font-bold py-4 px-8 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105">
+                    <!-- UPDATED: Added tracking-wide for letter spacing -->
+                    <a id="download-link" class="inline-block bg-blue-600 hover:bg-blue-700 text-white text-2xl font-pixel py-4 px-8 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105 tracking-wide">
                         Download .mcpack
                     </a>
-                    <!-- UPDATED: Button text, color, and icon added -->
-                    <a id="download-pdf-link" class="inline-flex items-center justify-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-xl font-bold py-4 px-8 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105 hidden">
+                    <!-- UPDATED: Button text, color, and icon added. Added 'font-pixel' and 'text-2xl'. Added tracking-wide -->
+                    <a id="download-pdf-link" class="inline-flex items-center justify-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-2xl font-pixel py-4 px-8 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105 hidden tracking-wide">
                         <!-- File Icon SVG -->
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
@@ -233,10 +262,12 @@
                 </div>
 
                 <div>
-                    <h3 classs="text-xl font-semibold mb-2">Your Particle Commands:</h3>
+                    <!-- UPDATED: Added tracking-wide for letter spacing -->
+                    <h3 class="text-2xl font-pixel mb-2 tracking-wide">Your Particle Commands:</h3>
                     <p class="text-gray-400 mb-2">Use these commands in-game to spawn your particles. Click to copy.</p>
                     <div class="bg-gray-900 rounded-lg p-4 text-left relative">
-                        <pre><code id="command-text" class="text-cyan-300 whitespace-pre-wrap font-mono"></code></pre>
+                        <!-- UPDATED: Changed text-cyan-300 to text-cyan-500 -->
+                        <pre><code id="command-text" class="text-cyan-500 whitespace-pre-wrap font-mono"></code></pre>
                         <button id="copy-button" title="Copy to clipboard" class="absolute top-3 right-3 bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded-md text-sm font-medium transition">
                             Copy
                         </button>
@@ -519,12 +550,14 @@
                         if (file) {
                             allUploadedTextures.set(path, file);
                             label.textContent = `✅ ${path} (Uploaded: ${file.name})`;
-                            label.classList.add('text-cyan-400');
+                            // UPDATED: Changed text-cyan-400 to text-cyan-500
+                            label.classList.add('text-cyan-500');
                             currentNewTexturesToUpload.delete(path);
                         } else {
                             allUploadedTextures.delete(path);
                             label.textContent = `Required Path: ${path}`;
-                            label.classList.remove('text-cyan-400');
+                            // UPDATED: Changed text-cyan-400 to text-cyan-500
+                            label.classList.remove('text-cyan-500');
                             currentNewTexturesToUpload.add(path);
                         }
                         validateCurrentParticleState();
