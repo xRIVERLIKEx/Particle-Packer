@@ -4,80 +4,82 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minecraft Particle Pack Generator</title>
-    <!-- Load Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Load JSZip library for creating zip files -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- Load Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load JSZip library for creating zip files --><script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- ADDED: Load jsPDF library for PDF generation --><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        /* NEW CSS for the background */
         body {
-            background-image: url('ParticleBG.gif');
-            background-attachment: fixed; /* Makes it not scroll */
-            background-size: cover; /* Stretches to fill the screen */
-            background-position: center;
+            /* Background GIF removed */
         }
 
         /* Custom styles for dark mode file inputs */
         input[type="file"]::file-selector-button {
-            @apply bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg cursor-pointer transition-colors duration-200;
+            background-color: #4A5568; /* gray-600 */
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem; /* rounded-md */
+            cursor: pointer;
+            transition: background-color 0.2s;
         }
-        input[type="file"] {
-            @apply text-gray-300;
-        }
-        /* Style for the copyable command block */
-        #command-output {
-            @apply bg-gray-900 text-green-400 p-4 rounded-lg font-mono relative;
-        }
-        #copy-button {
-            @apply absolute top-2 right-2 bg-gray-700 hover:bg-gray-600 text-white py-1 px-3 rounded-lg text-sm;
+
+        input[type="file"]::file-selector-button:hover {
+            background-color: #2D3748; /* gray-700 */
         }
     </style>
 </head>
-<body class="text-white font-sans p-6 md:p-12"> <!-- Removed bg-gray-900 from class list -->
+<body class="bg-gray-900 text-white font-sans p-6 md:p-12">
 
-    <!-- Added transparency and backdrop blur to see the background through the card -->
     <div class="max-w-3xl mx-auto bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-2xl p-8 md:p-10">
         
         <header class="text-center mb-8">
-            <!-- ADDED IMAGE HERE -->
-            <img src="Cleverlike School Header Image.png" alt="Cleverlike School Header" class="mx-auto mb-6" style="max-height: 90px;">
+            <img src="https://raw.githubusercontent.com/xRIVERLIKEx/Particle-Packer-v2/main/Cleverlike%20School%20Header%20Image.png" alt="Cleverlike School Header" class="mx-auto mb-6" style="max-height: 90px;">
             
             <h1 class="text-4xl font-bold text-green-400 mb-2">Particle Pack Generator</h1>
             <p class="text-xl text-gray-300">For Minecraft Bedrock & Education</p>
         </header>
 
-        <!-- Main Form -->
         <div class="space-y-8">
 
-            <!-- Step 1: Pack Details -->
-            <section id="step-1" class="space-y-4">
+            <!-- Step 1: Pack Details --><section id="step-1" class="space-y-4">
                 <h2 class="text-2xl font-semibold border-b-2 border-gray-700 pb-2">Step 1: Pack Details</h2>
                 <div>
-                    <label for="pack-name" class="block text-sm font-medium text-gray-300 mb-2">Pack Name</label>
+                    <label for="pack-name" class="block text-sm font-medium text-gray-300 mb-2">Pack Name (Required)</label>
                     <input type="text" id="pack-name" placeholder="e.g., My Awesome Particles" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div>
-                    <label for="pack-desc" class="block text-sm font-medium text-gray-300 mb-2">Pack Description</label>
+                    <label for="pack-desc" class="block text-sm font-medium text-gray-300 mb-2">Pack Description (Required)</label>
                     <input type="text" id="pack-desc" placeholder="A pack full of awesome particles" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
-                <!-- New Pack Icon Uploader -->
+                
+                <!-- UPDATED: Pack Icon Section -->
                 <div>
-                    <label for="pack-icon" class="block text-sm font-medium text-gray-300 mb-2">Pack Icon (Optional)</label>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Pack Icon (Required)</label>
+                    
+                    <p class="text-gray-400 text-sm mb-2">Select a wand as your icon:</p>
+                    <div class="bg-gray-700 p-4 rounded-lg mb-3">
+                        <div id="wand-icon-selection-container" class="grid grid-cols-4 sm:grid-cols-7 gap-3">
+                            <!-- Wand icons will be loaded here by JS -->
+                        </div>
+                    </div>
+                    
+                    <p class="text-gray-400 text-sm text-center my-2">OR</p>
+
+                    <label for="pack-icon" class="block text-sm font-medium text-gray-300 mb-2">Upload your own icon:</label>
                     <input type="file" id="pack-icon" accept="image/png" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3">
+                    
                     <p id="pack-icon-feedback" class="text-sm text-green-400 mt-2 hidden"></p>
                 </div>
             </section>
 
-            <!-- List of Added Particles -->
-            <section id="particle-list-section" class="hidden">
+            <!-- List of Added Particles --><section id="particle-list-section" class="hidden">
                 <h2 class="text-2xl font-semibold border-b-2 border-gray-700 pb-2 mb-4">Added Particles</h2>
-                <div id="particle-list-container" class="space-y-2 bg-gray-700 p-4 rounded-lg">
-                    <!-- Added particles will be listed here -->
-                </div>
+                <!-- UPDATED: This is now a grid -->
+                <div id="particle-list-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 bg-gray-700 p-4 rounded-lg">
+                    <!-- Added particles will be shown as cards here --></div>
             </section>
 
-            <!-- Step 2: Snowstorm File -->
-            <section id="step-2" class="space-y-4">
+            <!-- Step 2: Snowstorm File --><section id="step-2-json" class="space-y-4 hidden">
                 <h2 class="text-2xl font-semibold border-b-2 border-gray-700 pb-2">Step 2: Upload Snowstorm .json File</h2>
                 <div>
                     <label for="json-file-input" class="block text-sm font-medium text-gray-300 mb-2">Select your particle's .json file:</label>
@@ -85,48 +87,59 @@
                 </div>
             </section>
 
-            <!-- Step 3: Textures (Dynamically populated) -->
-            <section id="step-3" class="hidden space-y-4">
-                <h2 class="text-2xl font-semibold border-b-2 border-gray-700 pb-2">Step 3: Upload Required Textures</h2>
-                <p class="text-gray-400">The app detected the following textures are needed. Please upload a <span class="font-bold text-yellow-400">.png</span> for each one.</p>
-                <div id="texture-uploads-container" class="space-y-5 bg-gray-700 p-6 rounded-lg">
-                    <!-- Texture inputs will be added here by JS -->
+            <!-- Step 3: Textures --><section id="step-3-textures" class="hidden space-y-6">
+                <h2 class="text-2xl font-semibold border-b-2 border-gray-700 pb-2">Step 3: Upload Textures</h2>
+                
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-200">Particle Textures</h3>
+                    <p class="text-gray-400">The app detected the following textures are needed for the particle itself.</p>
+                    <div id="texture-uploads-container" class="space-y-5 bg-gray-700 p-6 rounded-lg mt-3">
+                        <!-- Texture inputs will be added here by JS --></div>
                 </div>
             </section>
 
-            <!-- Step 4: Add Particle Button -->
-            <section id="step-add-particle" class="hidden">
+            <!-- Step 4: Add Particle Button --><section id="step-add-particle" class="hidden">
                 <button id="add-particle-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold py-3 px-6 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed" disabled>
                     Add Particle to Pack
                 </button>
             </section>
 
-            <!-- Step 5: Generate -->
-            <section id="step-generate" class="hidden">
+            <!-- NEW: Step 5: Choice -->
+            <section id="step-choice" class="hidden space-y-4 pt-4">
+                <button id="add-another-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold py-3 px-6 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105">
+                    Add Additional Particles
+                </button>
                 <button id="generate-button" class="w-full bg-green-600 hover:bg-green-700 text-white text-xl font-bold py-4 px-6 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105">
-                    Generate Pack with Added Particles
+                    Generate Resource Pack (.mcpack)
                 </button>
                 <div id="error-message" class="text-red-400 text-center mt-4 font-medium"></div>
             </section>
 
-            <!-- Step 6: Download & Command (Dynamically populated) -->
-            <section id="step-download" class="hidden space-y-6 text-center">
-                <h2 class="text-3xl font-semibold text-green-400">Pack Generated Successfully!</h2>
+            <!-- REMOVED: Old Step 5: Generate --><!-- <section id="step-generate" class="hidden"> ... </section> -->
+
+            <!-- Step 6: Download & Command --><section id="step-download" class="hidden space-y-6 text-center">
+                <h2 class="text-3xl font-semibold text-green-400">Resource Pack Generated Successfully!</h2>
+                <p class="text-gray-300">Download the <span class="font-bold">.mcpack</span> file and open it with Minecraft. Make sure to activate the Resource Pack on your world.</p>
                 
-                <!-- Download Button -->
-                <div>
+                <!-- UPDATED: Wrapper for two buttons -->
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
                     <a id="download-link" class="inline-block bg-blue-600 hover:bg-blue-700 text-white text-xl font-bold py-4 px-8 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105">
                         Download .mcpack
                     </a>
+                    <!-- ADDED: PDF Download Button -->
+                    <a id="download-pdf-link" class="inline-block bg-gray-600 hover:bg-gray-700 text-white text-xl font-bold py-4 px-8 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105 hidden">
+                        Download PDF Docs
+                    </a>
                 </div>
 
-                <!-- Command Output -->
                 <div>
                     <h3 classs="text-xl font-semibold mb-2">Your Particle Commands:</h3>
                     <p class="text-gray-400 mb-2">Use these commands in-game to spawn your particles. Click to copy.</p>
-                    <div id="command-output">
-                        <button id="copy-button" title="Copy to clipboard">Copy</button>
-                        <pre><code id="command-text" class="whitespace-pre-wrap"></code></pre>
+                    <div class="bg-gray-900 rounded-lg p-4 text-left relative">
+                        <pre><code id="command-text" class="text-green-300 whitespace-pre-wrap font-mono"></code></pre>
+                        <button id="copy-button" title="Copy to clipboard" class="absolute top-3 right-3 bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded-md text-sm font-medium transition">
+                            Copy
+                        </button>
                     </div>
                 </div>
             </section>
@@ -136,47 +149,66 @@
 
     <script type="module">
         // --- Global State ---
-        let particleQueue = []; // Stores all added particle data
-        let allUploadedTextures = new Map(); // Global map of "textures/path.png" -> File object
-        let packIconFile = null; // To store the optional pack_icon.png
+        let particleQueue = []; 
+        let allUploadedTextures = new Map();
+        let packIconFile = null; // NOW REQUIRED
 
         // --- Current Particle State (Temporary) ---
         let currentJson = null;
         let currentOriginalFileName = 'particle.json';
+        let currentIdentifier = 'cleverlike:particle';
         let currentRequiredTextures = new Set();
         let currentNewTexturesToUpload = new Set();
+
+        // --- ADDED: Map to store built-in wand data ---
+        const builtInWandBlobs = new Map();
+        const wandIconSelectionContainer = document.getElementById('wand-icon-selection-container');
+        
+        // ADDED: Define the wand filenames and their IDs
+        const wandFiles = new Map([
+            ['wand_yellow', 'https://raw.githubusercontent.com/xRIVERLIKEx/Particle-Packer-v2/main/wand.png'],
+            ['wand_red', 'https://raw.githubusercontent.com/xRIVERLIKEx/Particle-Packer-v2/main/wand2.png'],
+            ['wand_orange', 'https://raw.githubusercontent.com/xRIVERLIKEx/Particle-Packer-v2/main/wand3.png'],
+            ['wand_green', 'https://raw.githubusercontent.com/xRIVERLIKEx/Particle-Packer-v2/main/wand4.png'],
+            ['wand_cyan', 'https://raw.githubusercontent.com/xRIVERLIKEx/Particle-Packer-v2/main/wand5.png'],
+            ['wand_purple', 'https://raw.githubusercontent.com/xRIVERLIKEx/Particle-Packer-v2/main/wand6.png'],
+            ['wand_pink', 'https://raw.githubusercontent.com/xRIVERLIKEx/Particle-Packer-v2/main/wand7.png']
+        ]);
+
 
         // --- DOM Elements ---
         const packNameInput = document.getElementById('pack-name');
         const packDescInput = document.getElementById('pack-desc');
-        const packIconInput = document.getElementById('pack-icon'); // Icon input
-        const packIconFeedback = document.getElementById('pack-icon-feedback'); // Icon feedback
+        const packIconInput = document.getElementById('pack-icon');
+        const packIconFeedback = document.getElementById('pack-icon-feedback');
         const jsonFileInput = document.getElementById('json-file-input');
         
         const particleListSection = document.getElementById('particle-list-section');
         const particleListContainer = document.getElementById('particle-list-container');
         
-        const step3Section = document.getElementById('step-3');
+        const step2Section = document.getElementById('step-2-json'); 
+        const step2Title = document.querySelector('#step-2-json h2');
+        const step3Section = document.getElementById('step-3-textures'); 
+        const step3Title = document.querySelector('#step-3-textures h2');
         const textureUploadsContainer = document.getElementById('texture-uploads-container');
         
         const stepAddParticle = document.getElementById('step-add-particle');
         const addParticleButton = document.getElementById('add-particle-button');
         
-        const stepGenerate = document.getElementById('step-generate');
-        const generateButton = document.getElementById('generate-button');
-        const errorMessage = document.getElementById('error-message');
+        // UPDATED: Point to new section
+        const stepChoiceSection = document.getElementById('step-choice');
+        const addAnotherButton = document.getElementById('add-another-button');
+        const generateButton = document.getElementById('generate-button'); // This button is now in 'step-choice'
+        const errorMessage = document.getElementById('error-message'); // This div is now in 'step-choice'
         
         const stepDownload = document.getElementById('step-download');
         const downloadLink = document.getElementById('download-link');
+        const downloadPdfLink = document.getElementById('download-pdf-link'); // ADDED
         const commandText = document.getElementById('command-text');
         const copyButton = document.getElementById('copy-button');
 
         // --- Helper Functions ---
         
-        /**
-         * Generates a random UUID (v4).
-         * Required for all manifest.json files.
-         */
         function generateUUID() {
             return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
                 var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -185,7 +217,7 @@
         }
 
         /**
-         * Stores the uploaded pack icon file.
+         * UPDATED: Handles pack icon file upload
          */
         function handlePackIconUpload(event) {
             const file = event.target.files[0];
@@ -193,63 +225,85 @@
                 packIconFile = file;
                 packIconFeedback.textContent = `✅ Icon selected: ${file.name}`;
                 packIconFeedback.classList.remove('hidden');
-            } else {
-                packIconFile = null;
-                packIconFeedback.classList.add('hidden');
+                
+                // Deselect any wands
+                const allButtons = wandIconSelectionContainer.querySelectorAll('button');
+                allButtons.forEach(btn => btn.classList.remove('border-blue-500', 'ring-2', 'ring-blue-500'));
             }
+            validatePackState(); // Check if Step 1 is complete
         }
 
         /**
-         * Displays an error message to the user.
+         * ADDED: Handles wand icon selection
          */
+        function handleWandIconSelection(event) {
+            const selectedButton = event.currentTarget;
+            const wandId = selectedButton.dataset.wandId;
+
+            const allButtons = wandIconSelectionContainer.querySelectorAll('button');
+            allButtons.forEach(btn => btn.classList.remove('border-blue-500', 'ring-2', 'ring-blue-500'));
+            selectedButton.classList.add('border-blue-500', 'ring-2', 'ring-blue-500');
+
+            packIconFile = builtInWandBlobs.get(wandId); // Set the icon file to the pre-loaded blob
+
+            packIconFeedback.textContent = `✅ ${wandId} selected as icon.`;
+            packIconFeedback.classList.remove('hidden');
+            packIconInput.value = ''; // Clear file input
+            
+            validatePackState(); // Check if Step 1 is complete
+        }
+
         function showError(message) {
             errorMessage.textContent = message;
-            // Clear the error after 5 seconds
             setTimeout(() => { errorMessage.textContent = ''; }, 5000);
         }
 
-        /**
-         * Checks if the *current* particle is valid and ready to be added.
-         */
         function validateCurrentParticleState() {
             const jsonValid = currentJson !== null;
             
-            // Check if all *new* textures for *this* particle are uploaded
             let newTexturesReady = true;
-            for (const path of currentNewTexturesToUpload) {
-                if (!allUploadedTextures.has(path)) {
-                    newTexturesReady = false;
-                    break;
+            if (currentNewTexturesToUpload.size > 0) {
+                for (let path of currentNewTexturesToUpload) {
+                    if (!allUploadedTextures.has(path)) {
+                        newTexturesReady = false;
+                        break;
+                    }
                 }
             }
 
             if (jsonValid && newTexturesReady) {
                 addParticleButton.disabled = false;
                 errorMessage.textContent = '';
+                stepAddParticle.classList.remove('hidden');
             } else {
                 addParticleButton.disabled = true;
+                stepAddParticle.classList.add('hidden');
             }
         }
 
         /**
-         * Checks if the final pack is ready to be generated.
+         * UPDATED: This function now also controls the visibility of Step 2
+         * and checks for a pack icon.
          */
         function validatePackState() {
             const nameValid = packNameInput.value.trim() !== '';
             const descValid = packDescInput.value.trim() !== '';
-            const particlesAdded = particleQueue.length > 0;
-
-            if (nameValid && descValid && particlesAdded) {
-                stepGenerate.classList.remove('hidden');
+            const iconValid = packIconFile !== null; // NOW REQUIRED
+            
+            // Control Step 2
+            if (nameValid && descValid && iconValid) {
+                // Only show Step 2 if no particles have been added yet,
+                // otherwise, the choice buttons should be showing.
+                if (particleQueue.length === 0) {
+                    step2Section.classList.remove('hidden');
+                }
             } else {
-                stepGenerate.classList.add('hidden');
+                step2Section.classList.add('hidden');
             }
+
+            // REMOVED: Generate Button logic removed from here
         }
 
-
-        /**
-         * Parses the Snowstorm JSON file content.
-         */
         function handleJsonFile(event) {
             const file = event.target.files[0];
             if (!file) {
@@ -263,67 +317,53 @@
             reader.onload = (e) => {
                 try {
                     const jsonString = e.target.result;
-                    let tempJson = JSON.parse(jsonString); // Parse once to validate
+                    let tempJson = JSON.parse(jsonString);
                     
-                    // Basic validation for Snowstorm file
                     if (!tempJson.particle_effect || !tempJson.particle_effect.description) {
                         throw new Error("This doesn't look like a valid Snowstorm JSON file.");
                     }
-                    
-                    // --- NEW LOGIC: Unique Texture Renaming ---
-                    // 1. Get a unique prefix from the filename
-                    const particlePrefix = currentOriginalFileName
-                        .replace(/.json$/i, '') // remove .json
-                        .replace(/[^a-z0-9]/gi, '_'); // sanitize
 
-                    // 2. Find all original texture paths
-                    const textureRegex = /"(textures\/[^"]+)"/g;
-                    const matches = jsonString.match(textureRegex) || [];
-                    const originalPaths = new Set(matches.map(path => path.substring(1, path.length - 1)));
+                    currentIdentifier = tempJson.particle_effect.description.identifier;
+                    if (!currentIdentifier || !currentIdentifier.includes(':')) {
+                        throw new Error("JSON must have a valid 'identifier' (e.g., 'namespace:particle_name').");
+                    }
+                    
+                    const particlePrefix = currentOriginalFileName
+                        .replace(/.json$/i, '')
+                        .replace(/[^a-z0-9]/gi, '_'); 
+
+                    const regex = /"(textures\/.*?)"/g;
+                    const matches = [...jsonString.matchAll(regex)].map(m => m[1]);
+                    const originalPaths = new Set(matches);
 
                     let modifiedJsonString = jsonString;
-                    currentRequiredTextures.clear(); // This will store the *new* paths
+                    currentRequiredTextures.clear(); 
 
-                    // 3. Create new paths and replace them in the string
                     originalPaths.forEach(originalPath => {
                         const pathParts = originalPath.split('/');
-                        const fileName = pathParts.pop(); // e.g., "flame.png"
-                        
-                        // Create a new unique filename
+                        const fileName = pathParts.pop();
                         const newFileName = `${particlePrefix}_${fileName}`; 
-                        
-                        // Create a new path. Let's put them in a 'particles' subfolder
-                        // "textures/particles/my_particle_flame.png"
                         const newPath = `textures/particles/${newFileName}`; 
                         
-                        // Add this *new* path to the list of required textures for this particle
                         currentRequiredTextures.add(newPath);
-
-                        // Replace all instances of the old path *in the string* with the new one
-                        // Use a regex to safely replace only the quoted string
                         modifiedJsonString = modifiedJsonString.replace(new RegExp(`"${originalPath}"`, 'g'), `"${newPath}"`);
                     });
 
-                    // 4. Re-parse the JSON with the *modified* paths
                     currentJson = JSON.parse(modifiedJsonString);
-                    // --- END NEW LOGIC ---
 
-                    // Figure out which textures are *new*
                     currentNewTexturesToUpload.clear();
                     currentRequiredTextures.forEach(path => {
-                        // Since paths are now unique (e.g., "textures/particles/particle1_flame.png"),
-                        // this check will correctly see them as new.
                         if (!allUploadedTextures.has(path)) {
                             currentNewTexturesToUpload.add(path);
                         }
                     });
 
-                    // Render the texture upload inputs
                     renderTextureInputs();
+                    step3Section.classList.remove('hidden');
                     validateCurrentParticleState();
 
                 } catch (err) {
-                    showError("Error parsing JSON file: " + err.message);
+                    showError(`Error processing JSON: ${err.message}`);
                     resetCurrentParticle();
                 }
             };
@@ -336,20 +376,14 @@
             reader.readAsText(file);
         }
 
-        /**
-         * Creates and displays file input fields for *only* new, un-uploaded textures.
-         */
         function renderTextureInputs() {
-            textureUploadsContainer.innerHTML = ''; // Clear previous inputs
+            textureUploadsContainer.innerHTML = '';
             
             if (currentNewTexturesToUpload.size === 0 && currentJson) {
-                // This particle uses no *new* textures
-                textureUploadsContainer.innerHTML = '<p class="text-gray-300 font-medium text-center">This particle uses textures you have already provided.</p>';
-                step3Section.classList.remove('hidden');
-                stepAddParticle.classList.remove('hidden');
+                textureUploadsContainer.innerHTML = '<p class="text-gray-300 font-medium text-center">This particle uses textures you have already provided, or requires no textures.</p>';
             } else if (currentNewTexturesToUpload.size > 0) {
                 currentNewTexturesToUpload.forEach(path => {
-                    const inputId = `texture-input-${path.replace(/[\/\.]/g, '-')}`;
+                    const inputId = `texture-input-${path.replace(/[^a-z0-9]/gi, '-')}`;
                     
                     const container = document.createElement('div');
                     container.className = "border-b border-gray-600 pb-4";
@@ -362,26 +396,23 @@
                     const input = document.createElement('input');
                     input.type = 'file';
                     input.id = inputId;
-                    input.accept = 'image/png'; // Only allow PNGs as they are standard
-                    input.className = 'w-full bg-gray-600 border border-gray-500 rounded-lg p-2';
+                    input.accept = 'image/png';
+                    input.className = "w-full bg-gray-600 border border-gray-500 rounded-lg p-2";
                     
-                    // Store the required path in the input's dataset
-                    input.dataset.path = path;
+                    input.dataset.path = path; 
                     
                     input.addEventListener('change', (e) => {
                         const file = e.target.files[0];
                         if (file) {
-                            allUploadedTextures.set(path, file); // Add to GLOBAL map
-                            // Add a visual cue
+                            allUploadedTextures.set(path, file);
                             label.textContent = `✅ ${path} (Uploaded: ${file.name})`;
                             label.classList.add('text-green-400');
-                            // Remove this input from the "needed" set for validation
                             currentNewTexturesToUpload.delete(path);
                         } else {
-                            allUploadedTextures.delete(path); // Remove from GLOBAL map
+                            allUploadedTextures.delete(path);
                             label.textContent = `Required Path: ${path}`;
                             label.classList.remove('text-green-400');
-                            currentNewTexturesToUpload.add(path); // Re-add to "needed" set
+                            currentNewTexturesToUpload.add(path);
                         }
                         validateCurrentParticleState();
                     });
@@ -390,86 +421,110 @@
                     container.appendChild(input);
                     textureUploadsContainer.appendChild(container);
                 });
-                step3Section.classList.remove('hidden');
-                stepAddParticle.classList.remove('hidden');
-            } else {
-                step3Section.classList.add('hidden');
-                stepAddParticle.classList.add('hidden');
             }
         }
 
-        /**
-         * Resets the "current particle" UI to add another one.
-         */
         function resetCurrentParticle() {
             currentJson = null;
             currentOriginalFileName = 'particle.json';
+            currentIdentifier = 'cleverlike:particle';
             currentRequiredTextures.clear();
             currentNewTexturesToUpload.clear();
 
-            jsonFileInput.value = ''; // Clear file input
+            jsonFileInput.value = '';
             step3Section.classList.add('hidden');
             textureUploadsContainer.innerHTML = '';
+            
             stepAddParticle.classList.add('hidden');
             addParticleButton.disabled = true;
         }
 
         /**
-         * Updates the list of added particles shown to the user.
+         * UPDATED: Renders the file card grid
          */
         function updateParticleListUI() {
-            particleListContainer.innerHTML = ''; // Clear list
+            particleListContainer.innerHTML = ''; // Clear the grid
             if (particleQueue.length === 0) {
                 particleListSection.classList.add('hidden');
                 return;
             }
 
             particleQueue.forEach((particle, index) => {
-                const item = document.createElement('div');
-                item.className = "text-green-300";
-                item.textContent = `Particle ${index + 1}: ${particle.identifier} (from ${particle.originalFileName})`;
-                particleListContainer.appendChild(item);
+                const card = document.createElement('div');
+                card.className = "bg-gray-600 p-4 rounded-lg text-center transition-all duration-300 ease-in-out";
+                
+                const imgContainer = document.createElement('div');
+                imgContainer.className = "w-16 h-16 mx-auto mb-2 flex items-center justify-center bg-gray-500 rounded-lg overflow-hidden";
+
+                if (particle.firstTextureFile) {
+                    const img = document.createElement('img');
+                    img.className = "w-full h-full object-cover";
+                    img.src = URL.createObjectURL(particle.firstTextureFile);
+                    img.onload = () => { URL.revokeObjectURL(img.src); } // Clean up blob URL
+                    imgContainer.innerHTML = '';
+                    imgContainer.appendChild(img);
+                } else {
+                    // Fallback file icon (SVG)
+                    imgContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
+                    </svg>`;
+                }
+
+                const name = document.createElement('p');
+                name.className = "text-sm text-white font-medium truncate";
+                name.textContent = particle.originalFileName.replace('.json', '');
+                
+                card.appendChild(imgContainer);
+                card.appendChild(name);
+                particleListContainer.appendChild(card);
             });
             particleListSection.classList.remove('hidden');
         }
 
         /**
-         * Adds the fully-defined "current" particle to the main pack queue.
+         * UPDATED: Now saves the first texture file
          */
         function handleAddParticleClick() {
-            if (addParticleButton.disabled || !currentJson) return;
+            if (addParticleButton.disabled || !currentJson) return; 
 
-            // Add to queue
+            // Find the first texture file, if one exists
+            let firstTextureFile = null;
+            if (currentRequiredTextures.size > 0) {
+                const firstTexturePath = currentRequiredTextures.values().next().value;
+                firstTextureFile = allUploadedTextures.get(firstTexturePath);
+            }
+
             particleQueue.push({
                 json: currentJson,
                 originalFileName: currentOriginalFileName,
-                identifier: currentJson.particle_effect.description.identifier
+                identifier: currentIdentifier,
+                firstTextureFile: firstTextureFile // Add the file to the queue item
             });
 
-            // Update UI
             updateParticleListUI();
             resetCurrentParticle();
-            validatePackState(); // Check if we can enable the final "Generate" button
+            
+            // UPDATED: Hide upload steps and show choice buttons
+            step2Section.classList.add('hidden');
+            step3Section.classList.add('hidden');
+            stepAddParticle.classList.add('hidden');
+            stepChoiceSection.classList.remove('hidden');
         }
 
-        /**
-         * Creates the manifest.json file content.
-         */
-        function createManifest(name, desc, uuid1, uuid2) {
-            // This function had a syntax error. It's now fixed.
+        function createRPManifest(name, desc, rp_uuid, rp_module_uuid) {
             return {
                 "format_version": 2,
                 "header": {
-                    "name": name,
+                    "name": `${name} (Resources)`,
                     "description": desc,
-                    "uuid": uuid1,
+                    "uuid": rp_uuid,
                     "version": [1, 0, 0],
-                    "min_engine_version": [1, 16, 0] // Common base version
+                    "min_engine_version": [1, 21, 0]
                 },
                 "modules": [
                     {
-                        "type": "resources", // Correct type for resource packs
-                        "uuid": uuid2,
+                        "type": "resources",
+                        "uuid": rp_module_uuid,
                         "version": [1, 0, 0]
                     }
                 ]
@@ -477,85 +532,146 @@
         }
 
         /**
-         * Main function to generate the .mcpack file.
+         * UPDATED: Includes PDF generation logic with header
          */
         async function handleGenerateClick() {
-            // Re-validate just in case
             if (particleQueue.length === 0) {
-                showError("Please add at least one particle first.");
+                showError("Please add at least one particle.");
                 return;
             }
-            if (packNameInput.value.trim() === '' || packDescInput.value.trim() === '') {
-                showError("Please provide a Pack Name and Description.");
+            if (packNameInput.value.trim() === '' || packDescInput.value.trim() === '' || packIconFile === null) {
+                showError("Please provide a Pack Name, Description, and Pack Icon.");
                 return;
             }
 
             try {
-                const zip = new JSZip();
+                const rp_zip = new JSZip(); 
+                
                 const packName = packNameInput.value.trim();
                 const packDesc = packDescInput.value.trim();
-                const uuid1 = generateUUID();
-                const uuid2 = generateUUID();
-
-                // 1. Create and add manifest.json
-                const manifest = createManifest(packName, packDesc, uuid1, uuid2);
-                zip.file("manifest.json", JSON.stringify(manifest, null, 2));
-
-                // Add pack_icon.png if it exists
-                if (packIconFile) {
-                    zip.file("pack_icon.png", packIconFile);
-                }
-
-                // 2. Add all particle JSON files
-                for (const particle of particleQueue) {
-                    zip.file(`particles/${particle.originalFileName}`, JSON.stringify(particle.json, null, 2));
-                }
-
-                // 3. Add all unique, uploaded textures
-                for (const [path, file] of allUploadedTextures.entries()) {
-                    // JSZip automatically creates folders from the path
-                    zip.file(path, file);
-                }
-
-                // 4. Generate the zip file as a blob
-                const blob = await zip.generateAsync({ type: "blob" });
-
-                // 5. Create download link
-                const url = URL.createObjectURL(blob);
-                downloadLink.href = url;
-                // Sanitize pack name for use in filename
                 const safeFileName = packName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+
+                const rp_uuid = generateUUID();
+                const rp_module_uuid = generateUUID();
+
+                const rpManifest = createRPManifest(packName, packDesc, rp_uuid, rp_module_uuid);
+                rp_zip.file("manifest.json", JSON.stringify(rpManifest, null, 2));
+
+                let particleTextureJson = { "resource_pack_name": "cleverlike_particles", "texture_data": {} };
+                
+                rp_zip.file("pack_icon.png", packIconFile);
+                
+                for (const particle of particleQueue) {
+                    rp_zip.file(`particles/${particle.originalFileName}`, JSON.stringify(particle.json, null, 2));
+                }
+                
+                for (const [path, file] of allUploadedTextures.entries()) {
+                    rp_zip.file(path, file);
+                    const shortPath = path.replace('textures/', '');
+                    const textureKey = shortPath.replace('.png', '');
+                    particleTextureJson.texture_data[textureKey] = { "textures": shortPath };
+                }
+
+                rp_zip.file("textures/particle_texture.json", JSON.stringify(particleTextureJson, null, 2));
+
+                const rp_blob = await rp_zip.generateAsync({ type: "blob" });
+                
+                const url = URL.createObjectURL(rp_blob);
+                downloadLink.href = url;
                 downloadLink.download = `${safeFileName}.mcpack`;
                 
-                // 6. Show all particle commands
-                const commands = particleQueue.map(p => `/particle ${p.identifier} ~ ~1 ~`).join('\n');
+                let commands = `## Particle commands:\n`;
+                commands += particleQueue.map(p => `/particle ${p.identifier} ~ ~ ~`).join('\n');
                 commandText.textContent = commands;
+
+                // --- ADDED: PDF Generation Logic with Header ---
+                try {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+                    
+                    // --- NEW: Load header image ---
+                    const headerImgUrl = 'https://raw.githubusercontent.com/xRIVERLIKEx/Particle-Packer-v2/main/Cleverlike%20School%20Header%20Image.png';
+                    const response = await fetch(headerImgUrl);
+                    const headerImgBlob = await response.blob();
+                    const headerImgData = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(headerImgBlob);
+                    });
+
+                    // --- NEW: Add Header Image & Title ---
+                    // Dimensions of the original image are 1032x242, aspect ratio ~4.26
+                    const imgWidth = 50;
+                    const imgHeight = imgWidth / 4.26;
+                    doc.addImage(headerImgData, 'PNG', 20, 15, imgWidth, imgHeight);
+                    
+                    doc.setFontSize(22);
+                    doc.text("Particle Packer", 20 + imgWidth + 10, 35);
+                    // --- END NEW HEADER ---
+
+                    let y = 60; // Adjusted Y position to be below header
+                    doc.setFontSize(14);
+                    doc.setFont("helvetica", "bold");
+                    
+                    particleQueue.forEach(particle => {
+                        if (y > 270) { // Simple page break
+                            doc.addPage();
+                            // Re-add header on new page
+                            doc.addImage(headerImgData, 'PNG', 20, 15, imgWidth, imgHeight);
+                            doc.setFontSize(22);
+                            doc.text("Particle Packer", 20 + imgWidth + 10, 35);
+                            y = 60;
+                            doc.setFontSize(14);
+                            doc.setFont("helvetica", "bold");
+                        }
+
+                        const particleName = particle.originalFileName.replace('.json', '');
+                        const particleCommand = `/particle ${particle.identifier} ~ ~ ~`;
+
+                        doc.setFont("helvetica", "bold");
+                        doc.text(particleName, 20, y);
+                        
+                        doc.setFontSize(12);
+                        doc.setFont("courier", "normal");
+                        doc.text(particleCommand, 20, y + 7);
+                        
+                        y += 20; // Move down for the next entry
+                    });
+
+                    const pdfBlob = doc.output('blob');
+                    const pdfUrl = URL.createObjectURL(pdfBlob);
+                    
+                    downloadPdfLink.href = pdfUrl;
+                    downloadPdfLink.download = `${safeFileName}_Documentation.pdf`;
+                    downloadPdfLink.classList.remove('hidden');
+
+                } catch (pdfErr) {
+                    console.error("Failed to generate PDF:", pdfErr);
+                    downloadPdfLink.classList.add('hidden');
+                }
+                // --- END PDF Logic ---
                 
-                // 7. Show the final section
                 stepDownload.classList.remove('hidden');
+                stepChoiceSection.classList.add('hidden'); // Hide choice buttons on success
 
             } catch (err) {
-                showError("An error occurred during pack generation: " + err.message);
+                showError(`Failed to generate pack: ${err.message}`);
                 console.error(err);
             }
         }
         
-        /**
-         * Copies the generated command to the clipboard.
-         */
         function copyCommandToClipboard() {
-            // Use a temporary textarea for broad compatibility
             const tempTextArea = document.createElement('textarea');
             tempTextArea.value = commandText.textContent;
             document.body.appendChild(tempTextArea);
             tempTextArea.select();
             try {
                 document.execCommand('copy');
-                // Give user feedback
                 copyButton.textContent = 'Copied!';
                 setTimeout(() => { copyButton.textContent = 'Copy'; }, 2000);
             } catch (err) {
-                console.error('Failed to copy text: ', err);
+                showError('Failed to copy commands.');
             }
             document.body.removeChild(tempTextArea);
         }
@@ -564,15 +680,80 @@
         jsonFileInput.addEventListener('change', handleJsonFile);
         packNameInput.addEventListener('input', validatePackState);
         packDescInput.addEventListener('input', validatePackState);
-        packIconInput.addEventListener('change', handlePackIconUpload); // Listener for icon
+        packIconInput.addEventListener('change', handlePackIconUpload); // Now calls validate
         
         addParticleButton.addEventListener('click', handleAddParticleClick);
         generateButton.addEventListener('click', handleGenerateClick);
         copyButton.addEventListener('click', copyCommandToClipboard);
 
-        // Initial validation checks
-        validatePackState();
-        validateCurrentParticleState();
+        // ADDED: Event listener for 'Add Another' button
+        addAnotherButton.addEventListener('click', () => {
+            stepChoiceSection.classList.add('hidden'); // Hide choices
+            step2Section.classList.remove('hidden'); // Show Step 2
+            jsonFileInput.value = ''; // Clear file input
+
+            // UPDATED: Change titles for subsequent particles
+            step2Title.textContent = "Upload Additional .json File";
+            step3Title.textContent = "Upload Additional Textures";
+        });
+        
+        /**
+         * ADDED: Renders the wand icon selection grid
+         */
+        function renderWandIconSelector() {
+            wandIconSelectionContainer.innerHTML = '';
+            
+            for (const [id, blob] of builtInWandBlobs.entries()) {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.dataset.wandId = id;
+                button.className = "bg-gray-600 rounded-lg p-2 border-2 border-transparent transition-all duration-150 hover:bg-gray-500 focus:outline-none";
+                button.title = `${id} wand`;
+                
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(blob); 
+                img.alt = `${id} wand texture`;
+                img.className = "w-full h-auto object-contain";
+                
+                img.onload = () => { URL.revokeObjectURL(img.src); }
+                
+                button.appendChild(img);
+                button.addEventListener('click', handleWandIconSelection);
+                wandIconSelectionContainer.appendChild(button);
+            }
+        }
+
+        /**
+         * MODIFIED: init now fetches wand icons
+         */
+        async function init() {
+            try {
+                // Fetch wand icons for the icon selector
+                for (const [id, filename] of wandFiles.entries()) {
+                    // Use the full raw URL
+                    const response = await fetch(new URL(filename, document.baseURI).href);
+                    if (!response.ok) {
+                        throw new Error(`Failed to load ${filename}`);
+                    }
+                    const blob = await response.blob();
+                    builtInWandBlobs.set(id, blob);
+                }
+                
+                // Render the icon grid
+                renderWandIconSelector();
+
+            } catch (e) {
+                console.error("Failed to load built-in wand icons:", e);
+                showError(`Error: Failed to load wand images from GitHub. [${e.message}]`);
+            }
+            
+            // Validate initial state
+            validatePackState();
+            validateCurrentParticleState();
+        }
+
+        // Run init on page load
+        init();
 
     </script>
 </body>
