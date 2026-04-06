@@ -3,16 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- UPDATED: Changed the title -->
     <title>PARTICLE PACKER</title>
     <!-- Load Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
-    <!-- ADDED: Configure Tailwind to add custom font -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        /* UPDATED: Changed the font definition */
                         'pixel': ['Silkscreen', 'sans-serif']
                     }
                 }
@@ -22,14 +19,12 @@
     <!-- Load JSZip library for creating zip files --><script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        /* UPDATED: Import the 'Silkscreen' font instead of 'VT323' */
         @import url('https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap');
         
         body {
-            /* Background GIF removed */
+            background-color: #111827;
         }
 
-        /* Custom styles for dark mode file inputs */
         input[type="file"]::file-selector-button {
             background-color: #4A5568; /* gray-600 */
             color: white;
@@ -44,7 +39,6 @@
             background-color: #2D3748; /* gray-700 */
         }
         
-        /* NEW: Particle Background Styles */
         @keyframes floatUp {
             0% {
                 transform: translateY(0) scale(var(--scale));
@@ -71,18 +65,15 @@
 
         .particle {
             position: absolute;
-            bottom: -16px; /* Start just below the viewport */
+            bottom: -16px;
             width: 16px;
             height: 16px;
-            /* UPDATED: Using the bubble.png raw URL */
-            background-image: url('bubble.png');
-            /* UPDATED: Set background-size to cover since it's a single image */
+            background-image: url('https://raw.githubusercontent.com/xRIVERLIKEx/Particle-Packer/main/bubble.png');
             background-size: cover;
-            mix-blend-mode: screen; /* Makes the black background transparent */
+            mix-blend-mode: screen;
             animation: floatUp linear infinite;
         }
 
-        /* NEW: Confetti Styles */
         @keyframes confetti-explode {
             0% {
                 opacity: 1;
@@ -90,7 +81,6 @@
             }
             100% {
                 opacity: 0;
-                /* UPDATED: Explode up and out to random X and Y positions */
                 transform: translateY(var(--y-end)) translateX(var(--x-end)) rotate(360deg) scale(0.5);
             }
         }
@@ -100,41 +90,28 @@
             height: 10px;
             background-color: var(--color);
             opacity: 0;
-            /* UPDATED: Use new animation */
             animation: confetti-explode ease-out forwards;
-            /* UPDATED: Random duration for each particle */
             animation-duration: var(--duration);
-            /* NEW: Center the particle on its origin point */
             transform-origin: center;
         }
     </style>
 </head>
 <body class="bg-gray-900 text-white font-sans p-6 md:p-12">
 
-    <!-- NEW: Particle Background Container -->
     <div id="particle-bg-container" class="particle-bg-container"></div>
 
-    <!-- NEW: Top Header (Logo moved here) -->
     <header class="text-center mb-6">
-        <img src="Cleverlike%20School%20Header%20Image.png" alt="Cleverlike School Header" class="mx-auto" style="max-height: 90px;">
+        <!-- UPDATED: Removed -v2 from the URL to match the repository name -->
+        <img src="https://raw.githubusercontent.com/xRIVERLIKEx/Particle-Packer/main/Cleverlike%20School%20Header%20Image.png" alt="Cleverlike School Header" class="mx-auto" style="max-height: 90px;">
     </header>
 
-    <!-- 
-      UPDATED: 
-      - Changed max-w-3xl to max-w-6xl to widen the page
-      - Added relative and z-10 so it sits on top of the particle background 
-    -->
     <div class="max-w-6xl mx-auto bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-2xl p-8 md:p-10 relative z-10" id="main-content-card">
         
         <header class="text-center mb-8">
-            <!-- UPDATED: Cleverlike logo removed from here -->
-            
-            <!-- UPDATED: This header section *keeps* the font-pixel class -->
             <h1 class="text-5xl font-pixel text-cyan-500 mb-2 tracking-wide">PARTICLE PACKER</h1>
             <p class="text-2xl text-gray-300 font-pixel tracking-wide">For Minecraft Bedrock & Education</p>
         </header>
         
-        <!-- NEW: Snowstorm Embed Section -->
         <section id="snowstorm-embed-section" class="mb-8 bg-gray-700 p-4 rounded-lg">
             <button id="toggle-snowstorm-embed" class="w-full text-left text-2xl font-semibold flex justify-between items-center transition-colors duration-200 hover:text-cyan-400">
                 <span>Snowstorm Particle Editor</span>
@@ -142,28 +119,17 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
             </button>
-            <!-- 
-              UPDATED: 
-              - Changed aspect-video to aspect-[16/10] for a better editor fit
-            -->
             <div id="snowstorm-iframe-container" class="hidden mt-4 aspect-[16/10] w-full rounded-lg overflow-hidden border-2 border-gray-600">
-                <!-- 
-                  UPDATED: 
-                  - Added allow attribute to help with clipboard and other features
-                -->
                 <iframe id="snowstorm-iframe" src="https://snowstorm.app/" class="w-full h-full" title="Snowstorm Particle Editor" allow="clipboard-read; clipboard-write; fullscreen"></iframe>
             </div>
             <p class="text-sm text-gray-400 mt-2">Click to expand the particle editor. Note: This is an embed of the external <a href="https://snowstorm.app/" target="_blank" class="text-cyan-400 hover:underline">snowstorm.app</a> website and may not load if they block embedding.</p>
         </section>
-        <!-- END: Snowstorm Embed Section -->
 
         <div class="space-y-8">
 
             <!-- Step 1: Pack Details --><section id="step-1" class="space-y-4">
-                <!-- UPDATED: Removed font-pixel and tracking-wide -->
                 <h2 class="text-3xl border-b-2 border-gray-700 pb-2 flex justify-between items-center">
                     <span>Step 1: Pack Details</span>
-                    <!-- UPDATED: Changed text-cyan-400 to text-cyan-500 -->
                     <span id="step-1-check" class="text-cyan-500 hidden">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
@@ -179,40 +145,30 @@
                     <input type="text" id="pack-desc" placeholder="A pack full of awesome particles" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 
-                <!-- UPDATED: Pack Icon Section -->
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">Pack Icon (Required)</label>
-                    
                     <p class="text-gray-400 text-sm mb-2">Select a wand as your icon:</p>
                     <div class="bg-gray-700 p-4 rounded-lg mb-3">
                         <div id="wand-icon-selection-container" class="grid grid-cols-4 sm:grid-cols-7 gap-3">
                             <!-- Wand icons will be loaded here by JS -->
                         </div>
                     </div>
-                    
                     <p class="text-gray-400 text-sm text-center my-2">OR</p>
-
                     <label for="pack-icon" class="block text-sm font-medium text-gray-300 mb-2">Upload your own icon:</label>
                     <input type="file" id="pack-icon" accept="image/png" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3">
-                    
-                    <!-- UPDATED: Changed text-cyan-400 to text-cyan-500 -->
                     <p id="pack-icon-feedback" class="text-sm text-cyan-500 mt-2 hidden"></p>
                 </div>
             </section>
 
-            <!-- List of Added Particles --><section id="particle-list-section" class="hidden">
-                <!-- UPDATED: Removed font-pixel and tracking-wide -->
+            <section id="particle-list-section" class="hidden">
                 <h2 class="text-3xl border-b-2 border-gray-700 pb-2 mb-4">Added Particles</h2>
-                <!-- UPDATED: This is now a grid -->
                 <div id="particle-list-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 bg-gray-700 p-4 rounded-lg">
                     <!-- Added particles will be shown as cards here --></div>
             </section>
 
             <!-- Step 2: Snowstorm File --><section id="step-2-json" class="space-y-4 hidden">
-                <!-- UPDATED: Removed font-pixel and tracking-wide -->
                 <h2 class="text-3xl border-b-2 border-gray-700 pb-2 flex justify-between items-center">
                     <span id="step-2-title-text">Step 2: Upload Snowstorm .json File</span>
-                    <!-- UPDATED: Changed text-cyan-400 to text-cyan-500 -->
                     <span id="step-2-check" class="text-cyan-500 hidden">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
@@ -223,10 +179,7 @@
                     <label for="json-file-input" class="block text-sm font-medium text-gray-300 mb-2">Select your particle's .json file:</label>
                     <input type="file" id="json-file-input" accept=".json" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3">
                 </div>
-                
-                <!-- *** MOVED HERE: Cancel Button *** -->
                 <div class="mt-4">
-                    <!-- UPDATED: Removed font-pixel and tracking-wide. Changed text-2xl to text-lg -->
                     <button id="cancel-add-particle-button" class="w-full bg-red-600 hover:bg-red-700 text-white text-lg font-semibold py-3 px-6 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105 hidden">
                         Cancel Adding Particle
                     </button>
@@ -234,19 +187,15 @@
             </section>
 
             <!-- Step 3: Textures --><section id="step-3-textures" class="hidden space-y-6">
-                <!-- UPDATED: Removed font-pixel and tracking-wide -->
                 <h2 class="text-3xl border-b-2 border-gray-700 pb-2 flex justify-between items-center">
                     <span id="step-3-title-text">Step 3: Upload Textures</span>
-                    <!-- UPDATED: Changed text-cyan-400 to text-cyan-500 -->
                     <span id="step-3-check" class="text-cyan-500 hidden">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                         </svg>
                     </span>
                 </h2>
-                
                 <div>
-                    <!-- UPDATED: Removed font-pixel and tracking-wide -->
                     <h3 class="text-2xl text-gray-200">Particle Textures</h3>
                     <p class="text-gray-400">The app detected the following textures are needed for the particle itself.</p>
                     <div id="texture-uploads-container" class="space-y-5 bg-gray-700 p-6 rounded-lg mt-3">
@@ -255,19 +204,16 @@
             </section>
 
             <!-- Step 4: Add Particle Button --><section id="step-add-particle" class="hidden space-y-4">
-                <!-- UPDATED: Removed font-pixel and tracking-wide. Changed text-2xl to text-lg -->
                 <button id="add-particle-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold py-3 px-6 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed" disabled>
                     Add Particle to Pack
                 </button>
             </section>
 
-            <!-- NEW: Step 5: Choice -->
+            <!-- Step 5: Choice -->
             <section id="step-choice" class="hidden space-y-4 pt-4">
-                <!-- UPDATED: Removed font-pixel and tracking-wide. Changed text-2xl to text-lg -->
                 <button id="add-another-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold py-3 px-6 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105">
                     Add Additional Particles
                 </button>
-                <!-- UPDATED: Removed font-pixel and tracking-wide. Changed text-2xl to text-xl -->
                 <button id="generate-button" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white text-xl font-semibold py-4 px-6 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105">
                     Generate Resource Pack (.mcpack)
                 </button>
@@ -275,31 +221,23 @@
             </section>
 
             <!-- Step 6: Download & Command --><section id="step-download" class="hidden space-y-6 text-center">
-                <!-- UPDATED: Removed font-pixel and tracking-wide -->
                 <h2 class="text-4xl text-cyan-500">Resource Pack Generated Successfully!</h2>
                 <p class="text-gray-300">Download the <span class="font-bold">.mcpack</span> file and open it with Minecraft. Make sure to activate the Resource Pack on your world.</p>
-                
                 <div class="flex flex-col sm:flex-row justify-center gap-4">
-                    <!-- UPDATED: Removed font-pixel and tracking-wide. Changed text-2xl to text-lg -->
                     <a id="download-link" class="inline-block bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold py-4 px-8 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105">
                         Download .mcpack
                     </a>
-                    <!-- UPDATED: Removed font-pixel and tracking-wide. Changed text-2xl to text-lg -->
                     <a id="download-pdf-link" class="inline-flex items-center justify-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-lg font-semibold py-4 px-8 rounded-lg shadow-lg transition-transform duration-200 transform hover:scale-105 hidden">
-                        <!-- File Icon SVG -->
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
                         </svg>
                         <span>Download PDF Doc</span>
                     </a>
                 </div>
-
                 <div>
-                    <!-- UPDATED: Removed font-pixel and tracking-wide -->
                     <h3 class="text-2xl mb-2">Your Particle Commands:</h3>
                     <p class="text-gray-400 mb-2">Use these commands in-game to spawn your particles. Click to copy.</p>
                     <div class="bg-gray-900 rounded-lg p-4 text-left relative">
-                        <!-- UPDATED: Changed text-cyan-300 to text-cyan-500 -->
                         <pre><code id="command-text" class="text-cyan-500 whitespace-pre-wrap font-mono"></code></pre>
                         <button id="copy-button" title="Copy to clipboard" class="absolute top-3 right-3 bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded-md text-sm font-medium transition">
                             Copy
@@ -307,27 +245,22 @@
                     </div>
                 </div>
             </section>
-
         </div>
     </div>
     
-    <!-- NEW: Footer Disclaimer -->
     <footer class="max-w-6xl mx-auto mt-8 text-center text-gray-500 text-xs px-4">
         <p class="mb-2">
             This site is not an official Minecraft product and is not approved by or associated with Mojang or Microsoft.
-            This site is not affiliated with Snowstorm.app; the embedded editor is provided as a convenience.
             This tool is provided for educational purposes and does not collect or store any user or student data.
         </p>
     </footer>
-    <!-- END: Footer Disclaimer -->
 
     <script type="module">
         // --- Global State ---
         let particleQueue = []; 
         let allUploadedTextures = new Map();
-        let packIconFile = null; // NOW REQUIRED
+        let packIconFile = null; 
 
-        // --- Current Particle State (Temporary) ---
         let currentJson = null;
         let currentOriginalFileName = 'particle.json';
         let currentIdentifier = 'cleverlike:particle';
@@ -338,72 +271,51 @@
         const wandIconSelectionContainer = document.getElementById('wand-icon-selection-container');
         
         const wandFiles = new Map([
-            ['wand_yellow', 'wand.png'],
-            ['wand_red', 'wand2.png'],
-            ['wand_orange', 'wand3.png'],
-            ['wand_green', 'wand4.png'],
-            ['wand_cyan', 'wand5.png'],
-            ['wand_purple', 'wand6.png'],
-            ['wand_pink', 'wand7.png']
+            ['wand_yellow', 'https://raw.githubusercontent.com/xRIVERLIKEx/Particle-Packer/main/wand.png'],
+            ['wand_red', 'https://raw.githubusercontent.com/xRIVERLIKEx/Particle-Packer/main/wand2.png'],
+            ['wand_orange', 'https://raw.githubusercontent.com/xRIVERLIKEx/Particle-Packer/main/wand3.png'],
+            ['wand_green', 'https://raw.githubusercontent.com/xRIVERLIKEx/Particle-Packer/main/wand4.png'],
+            ['wand_cyan', 'https://raw.githubusercontent.com/xRIVERLIKEx/Particle-Packer/main/wand5.png'],
+            ['wand_purple', 'https://raw.githubusercontent.com/xRIVERLIKEx/Particle-Packer/main/wand6.png'],
+            ['wand_pink', 'https://raw.githubusercontent.com/xRIVERLIKEx/Particle-Packer/main/wand7.png']
         ]);
 
-
-        // --- DOM Elements ---
         const packNameInput = document.getElementById('pack-name');
         const packDescInput = document.getElementById('pack-desc');
         const packIconInput = document.getElementById('pack-icon');
         const packIconFeedback = document.getElementById('pack-icon-feedback');
         const jsonFileInput = document.getElementById('json-file-input');
-        
         const particleListSection = document.getElementById('particle-list-section');
         const particleListContainer = document.getElementById('particle-list-container');
-        
         const step2Section = document.getElementById('step-2-json'); 
-        const step2Title = document.getElementById('step-2-title-text'); // UPDATED
+        const step2Title = document.getElementById('step-2-title-text'); 
         const step3Section = document.getElementById('step-3-textures'); 
-        const step3Title = document.getElementById('step-3-title-text'); // UPDATED
+        const step3Title = document.getElementById('step-3-title-text'); 
         const textureUploadsContainer = document.getElementById('texture-uploads-container');
-        
-        // NEW: Checkmark elements
         const step1Check = document.getElementById('step-1-check');
         const step2Check = document.getElementById('step-2-check');
         const step3Check = document.getElementById('step-3-check');
-        
         const stepAddParticle = document.getElementById('step-add-particle');
         const addParticleButton = document.getElementById('add-particle-button');
-        const cancelAddParticleButton = document.getElementById('cancel-add-particle-button'); // MOVED
-        
+        const cancelAddParticleButton = document.getElementById('cancel-add-particle-button'); 
         const stepChoiceSection = document.getElementById('step-choice');
         const addAnotherButton = document.getElementById('add-another-button');
         const generateButton = document.getElementById('generate-button');
         const errorMessage = document.getElementById('error-message');
-        
         const stepDownload = document.getElementById('step-download');
         const downloadLink = document.getElementById('download-link');
         const downloadPdfLink = document.getElementById('download-pdf-link');
         const commandText = document.getElementById('command-text');
         const copyButton = document.getElementById('copy-button');
-
-        // NEW: Snowstorm Embed Elements
         const toggleSnowstormEmbed = document.getElementById('toggle-snowstorm-embed');
         const snowstormIframeContainer = document.getElementById('snowstorm-iframe-container');
         const snowstormChevron = document.getElementById('snowstorm-chevron');
 
-
-        // --- Helper Functions ---
-        
-        /**
-         * NEW: Helper function to smoothly scroll to an element
-         */
         function scrollToElement(element) {
             if (element && !element.classList.contains('hidden')) {
-                // A slight delay to ensure the element is rendered before scrolling
                 setTimeout(() => {
-                    element.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start' 
-                    });
-                }, 100); // 100ms delay
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
             }
         }
 
@@ -420,7 +332,6 @@
                 packIconFile = file;
                 packIconFeedback.textContent = `✅ Icon selected: ${file.name}`;
                 packIconFeedback.classList.remove('hidden');
-                
                 const allButtons = wandIconSelectionContainer.querySelectorAll('button');
                 allButtons.forEach(btn => btn.classList.remove('border-blue-500', 'ring-2', 'ring-blue-500'));
             }
@@ -430,17 +341,13 @@
         function handleWandIconSelection(event) {
             const selectedButton = event.currentTarget;
             const wandId = selectedButton.dataset.wandId;
-
             const allButtons = wandIconSelectionContainer.querySelectorAll('button');
             allButtons.forEach(btn => btn.classList.remove('border-blue-500', 'ring-2', 'ring-blue-500'));
             selectedButton.classList.add('border-blue-500', 'ring-2', 'ring-blue-500');
-
             packIconFile = builtInWandBlobs.get(wandId);
-
             packIconFeedback.textContent = `✅ ${wandId} selected as icon.`;
             packIconFeedback.classList.remove('hidden');
             packIconInput.value = '';
-            
             validatePackState();
         }
 
@@ -451,7 +358,6 @@
 
         function validateCurrentParticleState() {
             const jsonValid = currentJson !== null;
-            
             let newTexturesReady = true;
             if (currentNewTexturesToUpload.size > 0) {
                 for (let path of currentNewTexturesToUpload) {
@@ -461,17 +367,16 @@
                     }
                 }
             }
-
             if (jsonValid && newTexturesReady) {
                 addParticleButton.disabled = false;
                 errorMessage.textContent = '';
                 stepAddParticle.classList.remove('hidden');
-                step3Check.classList.remove('hidden'); // NEW: Show check for step 3
-                scrollToElement(stepAddParticle); // ADDED
+                step3Check.classList.remove('hidden');
+                scrollToElement(stepAddParticle);
             } else {
                 addParticleButton.disabled = true;
                 stepAddParticle.classList.add('hidden');
-                step3Check.classList.add('hidden'); // NEW: Hide check
+                step3Check.classList.add('hidden');
             }
         }
 
@@ -479,15 +384,14 @@
             const nameValid = packNameInput.value.trim() !== '';
             const descValid = packDescInput.value.trim() !== '';
             const iconValid = packIconFile !== null;
-            
             if (nameValid && descValid && iconValid) {
-                step1Check.classList.remove('hidden'); // NEW: Show check for step 1
+                step1Check.classList.remove('hidden');
                 if (particleQueue.length === 0) {
                     step2Section.classList.remove('hidden');
-                    scrollToElement(step2Section); // ADDED
+                    scrollToElement(step2Section);
                 }
             } else {
-                step1Check.classList.add('hidden'); // NEW: Hide check
+                step1Check.classList.add('hidden');
                 step2Section.classList.add('hidden');
             }
         }
@@ -498,120 +402,87 @@
                 resetCurrentParticle();
                 return;
             }
-
             currentOriginalFileName = file.name;
             const reader = new FileReader();
-
             reader.onload = (e) => {
                 try {
                     const jsonString = e.target.result;
                     let tempJson = JSON.parse(jsonString);
-                    
                     if (!tempJson.particle_effect || !tempJson.particle_effect.description) {
                         throw new Error("This doesn't look like a valid Snowstorm JSON file.");
                     }
-
                     currentIdentifier = tempJson.particle_effect.description.identifier;
                     if (!currentIdentifier || !currentIdentifier.includes(':')) {
                         throw new Error("JSON must have a valid 'identifier' (e.g., 'namespace:particle_name').");
                     }
-                    
-                    const particlePrefix = currentOriginalFileName
-                        .replace(/.json$/i, '')
-                        .replace(/[^a-z0-9]/gi, '_'); 
-
+                    const particlePrefix = currentOriginalFileName.replace(/.json$/i, '').replace(/[^a-z0-9]/gi, '_'); 
                     const regex = /"(textures\/.*?)"/g;
                     const matches = [...jsonString.matchAll(regex)].map(m => m[1]);
                     const originalPaths = new Set(matches);
-
                     let modifiedJsonString = jsonString;
                     currentRequiredTextures.clear(); 
-
                     originalPaths.forEach(originalPath => {
                         const pathParts = originalPath.split('/');
                         const fileName = pathParts.pop();
                         const newFileName = `${particlePrefix}_${fileName}`; 
                         const newPath = `textures/particles/${newFileName}`; 
-                        
                         currentRequiredTextures.add(newPath);
                         modifiedJsonString = modifiedJsonString.replace(new RegExp(`"${originalPath}"`, 'g'), `"${newPath}"`);
                     });
-
                     currentJson = JSON.parse(modifiedJsonString);
-
-                    // UPDATED: Fix logic bug
-                    // Was looping over currentNewTexturesToUpload (which was empty)
-                    // Now loops over currentRequiredTextures (which has the textures)
-                    currentNewTexturesToUpload.clear(); // Ensure it's empty
+                    currentNewTexturesToUpload.clear();
                     currentRequiredTextures.forEach(path => {
                         if (!allUploadedTextures.has(path)) {
                             currentNewTexturesToUpload.add(path);
                         }
                     });
-
                     renderTextureInputs();
                     step3Section.classList.remove('hidden');
-                    step2Check.classList.remove('hidden'); // NEW: Show check for step 2
-                    scrollToElement(step3Section); // ADDED
+                    step2Check.classList.remove('hidden');
+                    scrollToElement(step3Section);
                     validateCurrentParticleState();
-
                 } catch (err) {
                     showError(`Error processing JSON: ${err.message}`);
                     resetCurrentParticle();
                 }
             };
-
-            reader.onerror = () => {
-                showError("Failed to read the file.");
-                resetCurrentParticle();
-            };
-
             reader.readAsText(file);
         }
 
         function renderTextureInputs() {
             textureUploadsContainer.innerHTML = '';
-            
             if (currentNewTexturesToUpload.size === 0 && currentJson) {
                 textureUploadsContainer.innerHTML = '<p class="text-gray-300 font-medium text-center">This particle uses textures you have already provided, or requires no textures.</p>';
             } else if (currentNewTexturesToUpload.size > 0) {
                 currentNewTexturesToUpload.forEach(path => {
                     const inputId = `texture-input-${path.replace(/[^a-z0-9]/gi, '-')}`;
-                    
                     const container = document.createElement('div');
                     container.className = "border-b border-gray-600 pb-4";
-                    
                     const label = document.createElement('label');
                     label.htmlFor = inputId;
                     label.className = "block text-sm font-medium text-gray-300 mb-2";
                     label.textContent = `Required Path: ${path}`;
-                    
                     const input = document.createElement('input');
                     input.type = 'file';
                     input.id = inputId;
                     input.accept = 'image/png';
                     input.className = "w-full bg-gray-600 border border-gray-500 rounded-lg p-2";
-                    
                     input.dataset.path = path; 
-                    
                     input.addEventListener('change', (e) => {
                         const file = e.target.files[0];
                         if (file) {
                             allUploadedTextures.set(path, file);
                             label.textContent = `✅ ${path} (Uploaded: ${file.name})`;
-                            // UPDATED: Changed text-cyan-400 to text-cyan-500
                             label.classList.add('text-cyan-500');
                             currentNewTexturesToUpload.delete(path);
                         } else {
                             allUploadedTextures.delete(path);
                             label.textContent = `Required Path: ${path}`;
-                            // UPDATED: Changed text-cyan-400 to text-cyan-500
                             label.classList.remove('text-cyan-500');
                             currentNewTexturesToUpload.add(path);
                         }
                         validateCurrentParticleState();
                     });
-                    
                     container.appendChild(label);
                     container.appendChild(input);
                     textureUploadsContainer.appendChild(container);
@@ -625,15 +496,11 @@
             currentIdentifier = 'cleverlike:particle';
             currentRequiredTextures.clear();
             currentNewTexturesToUpload.clear();
-
             jsonFileInput.value = '';
             step3Section.classList.add('hidden');
             textureUploadsContainer.innerHTML = '';
-            
             stepAddParticle.classList.add('hidden');
             addParticleButton.disabled = true;
-
-            // NEW: Hide checkmarks for reset steps
             step2Check.classList.add('hidden');
             step3Check.classList.add('hidden');
         }
@@ -644,14 +511,11 @@
                 particleListSection.classList.add('hidden');
                 return;
             }
-
             particleQueue.forEach((particle, index) => {
                 const card = document.createElement('div');
                 card.className = "bg-gray-600 p-4 rounded-lg text-center transition-all duration-300 ease-in-out";
-                
                 const imgContainer = document.createElement('div');
                 imgContainer.className = "w-16 h-16 mx-auto mb-2 flex items-center justify-center bg-gray-500 rounded-lg overflow-hidden";
-
                 if (particle.firstTextureFile) {
                     const img = document.createElement('img');
                     img.className = "w-full h-full object-cover";
@@ -660,15 +524,11 @@
                     imgContainer.innerHTML = '';
                     imgContainer.appendChild(img);
                 } else {
-                    imgContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
-                    </svg>`;
+                    imgContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" /></svg>`;
                 }
-
                 const name = document.createElement('p');
                 name.className = "text-sm text-white font-medium truncate";
                 name.textContent = particle.originalFileName.replace('.json', '');
-                
                 card.appendChild(imgContainer);
                 card.appendChild(name);
                 particleListContainer.appendChild(card);
@@ -678,49 +538,25 @@
 
         function handleAddParticleClick() {
             if (addParticleButton.disabled || !currentJson) return; 
-
             let firstTextureFile = null;
             if (currentRequiredTextures.size > 0) {
                 const firstTexturePath = currentRequiredTextures.values().next().value;
                 firstTextureFile = allUploadedTextures.get(firstTexturePath);
             }
-
             particleQueue.push({
                 json: currentJson,
                 originalFileName: currentOriginalFileName,
                 identifier: currentIdentifier,
                 firstTextureFile: firstTextureFile
             });
-
             updateParticleListUI();
             resetCurrentParticle();
-            
             step2Section.classList.add('hidden');
             step3Section.classList.add('hidden');
             stepAddParticle.classList.add('hidden');
-            cancelAddParticleButton.classList.add('hidden'); // Hide cancel button on success
+            cancelAddParticleButton.classList.add('hidden'); 
             stepChoiceSection.classList.remove('hidden');
-            scrollToElement(stepChoiceSection); // ADDED
-        }
-
-        function createRPManifest(name, desc, rp_uuid, rp_module_uuid) {
-            return {
-                "format_version": 2,
-                "header": {
-                    "name": `${name} (Resources)`,
-                    "description": desc,
-                    "uuid": rp_uuid,
-                    "version": [1, 0, 0],
-                    "min_engine_version": [1, 21, 0]
-                },
-                "modules": [
-                    {
-                        "type": "resources",
-                        "uuid": rp_module_uuid,
-                        "version": [1, 0, 0]
-                    }
-                ]
-            };
+            scrollToElement(stepChoiceSection);
         }
 
         async function handleGenerateClick() {
@@ -732,320 +568,157 @@
                 showError("Please provide a Pack Name, Description, and Pack Icon.");
                 return;
             }
-
             try {
                 const rp_zip = new JSZip(); 
-                
                 const packName = packNameInput.value.trim();
                 const packDesc = packDescInput.value.trim();
                 const safeFileName = packName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-
                 const rp_uuid = generateUUID();
                 const rp_module_uuid = generateUUID();
-
-                const rpManifest = createRPManifest(packName, packDesc, rp_uuid, rp_module_uuid);
+                const rpManifest = { "format_version": 2, "header": { "name": `${packName} (Resources)`, "description": packDesc, "uuid": rp_uuid, "version": [1, 0, 0], "min_engine_version": [1, 21, 0] }, "modules": [ { "type": "resources", "uuid": rp_module_uuid, "version": [1, 0, 0] } ] };
                 rp_zip.file("manifest.json", JSON.stringify(rpManifest, null, 2));
-
                 let particleTextureJson = { "resource_pack_name": "cleverlike_particles", "texture_data": {} };
-                
                 rp_zip.file("pack_icon.png", packIconFile);
-                
                 for (const particle of particleQueue) {
                     rp_zip.file(`particles/${particle.originalFileName}`, JSON.stringify(particle.json, null, 2));
                 }
-                
                 for (const [path, file] of allUploadedTextures.entries()) {
                     rp_zip.file(path, file);
                     const shortPath = path.replace('textures/', '');
                     const textureKey = shortPath.replace('.png', '');
                     particleTextureJson.texture_data[textureKey] = { "textures": shortPath };
                 }
-
                 rp_zip.file("textures/particle_texture.json", JSON.stringify(particleTextureJson, null, 2));
-
                 const rp_blob = await rp_zip.generateAsync({ type: "blob" });
-                
                 const url = URL.createObjectURL(rp_blob);
                 downloadLink.href = url;
                 downloadLink.download = `${safeFileName}.mcpack`;
-                
                 let commands = `## Particle commands:\n`;
                 commands += particleQueue.map(p => `/particle ${p.identifier} ~ ~ ~`).join('\n');
                 commandText.textContent = commands;
-
                 try {
                     const { jsPDF } = window.jspdf;
                     const doc = new jsPDF();
-                    
-                    const headerImgUrl = 'https://raw.githubusercontent.com/xRIVERLIKEx/Particle-Packer-v2/main/Cleverlike%20School%20Header%20Image.png';
+                    const headerImgUrl = 'https://raw.githubusercontent.com/xRIVERLIKEx/Particle-Packer/main/Cleverlike%20School%20Header%20Image.png';
                     const response = await fetch(headerImgUrl);
                     const headerImgBlob = await response.blob();
-                    const headerImgData = await new Promise((resolve, reject) => {
+                    const headerImgData = await new Promise((resolve) => {
                         const reader = new FileReader();
                         reader.onloadend = () => resolve(reader.result);
-                        reader.onerror = reject;
                         reader.readAsDataURL(headerImgBlob);
                     });
-
                     const imgWidth = 50;
                     const imgHeight = imgWidth / 4.26;
                     doc.addImage(headerImgData, 'PNG', 20, 15, imgWidth, imgHeight);
-                    
                     doc.setFontSize(22);
                     doc.text("Particle Packer", 20 + imgWidth + 10, 35);
-
                     let y = 60;
-                    doc.setFontSize(14);
-                    doc.setFont("helvetica", "bold");
-                    
                     particleQueue.forEach(particle => {
-                        if (y > 270) {
-                            doc.addPage();
-                            doc.addImage(headerImgData, 'PNG', 20, 15, imgWidth, imgHeight);
-                            doc.setFontSize(22);
-                            doc.text("Particle Packer", 20 + imgWidth + 10, 35);
-                            y = 60;
-                            doc.setFontSize(14);
-                            doc.setFont("helvetica", "bold");
-                        }
-
-                        const particleName = particle.originalFileName.replace('.json', '');
-                        const particleCommand = `/particle ${particle.identifier} ~ ~ ~`;
-
+                        if (y > 270) { doc.addPage(); doc.addImage(headerImgData, 'PNG', 20, 15, imgWidth, imgHeight); y = 60; }
                         doc.setFont("helvetica", "bold");
-                        doc.text(particleName, 20, y);
-                        
-                        doc.setFontSize(12);
+                        doc.setFontSize(14);
+                        doc.text(particle.originalFileName.replace('.json', ''), 20, y);
                         doc.setFont("courier", "normal");
-                        doc.text(particleCommand, 20, y + 7);
-                        
+                        doc.setFontSize(12);
+                        doc.text(`/particle ${particle.identifier} ~ ~ ~`, 20, y + 7);
                         y += 20;
                     });
-
-                    const pdfBlob = doc.output('blob');
-                    const pdfUrl = URL.createObjectURL(pdfBlob);
-                    
-                    downloadPdfLink.href = pdfUrl;
+                    downloadPdfLink.href = URL.createObjectURL(doc.output('blob'));
                     downloadPdfLink.download = `${safeFileName}_Documentation.pdf`;
                     downloadPdfLink.classList.remove('hidden');
-
-                } catch (pdfErr) {
-                    console.error("Failed to generate PDF:", pdfErr);
-                    downloadPdfLink.classList.add('hidden');
-                }
-                
-                // --- NEW: Trigger Confetti ---
+                } catch (pdfErr) { console.error(pdfErr); }
                 triggerConfetti(); 
-                
                 stepDownload.classList.remove('hidden');
                 stepChoiceSection.classList.add('hidden');
-                scrollToElement(stepDownload); // ADDED
-
-            } catch (err) {
-                showError(`Failed to generate pack: ${err.message}`);
-                console.error(err);
-            }
+                scrollToElement(stepDownload);
+            } catch (err) { showError(err.message); }
         }
         
-        function copyCommandToClipboard() {
-            const tempTextArea = document.createElement('textarea');
-            tempTextArea.value = commandText.textContent;
-            document.body.appendChild(tempTextArea);
-            tempTextArea.select();
-            try {
-                document.execCommand('copy');
-                copyButton.textContent = 'Copied!';
-                setTimeout(() => { copyButton.textContent = 'Copy'; }, 2000);
-            } catch (err) {
-                showError('Failed to copy commands.');
-            }
-            document.body.removeChild(tempTextArea);
-        }
-
-        /**
-         * NEW: Creates a burst of confetti
-         */
         function triggerConfetti() {
-            const container = document.getElementById('main-content-card'); // Burst from the main card
-            const button = document.getElementById('generate-button'); // The button to burst from
-            if (!container || !button) return;
-
-            // Get button position relative to the card
+            const container = document.getElementById('main-content-card');
+            const button = document.getElementById('generate-button');
             const buttonRect = button.getBoundingClientRect();
             const cardRect = container.getBoundingClientRect();
-            
             const startX = buttonRect.left - cardRect.left + (buttonRect.width / 2);
-            const startY = buttonRect.top - cardRect.top; // Erupt from the top edge of the button
-
-            const particleCount = 100;
-            const colors = ['#22d3ee', '#06b6d4', '#0891b2', '#f0f9ff', '#e0f2fe']; // Cyan and white colors
-
-            for (let i = 0; i < particleCount; i++) {
+            const startY = buttonRect.top - cardRect.top;
+            for (let i = 0; i < 100; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'confetti-particle';
-                
-                // Horizontal spread from -150px to +150px
                 const xEnd = (Math.random() - 0.5) * 300; 
-                // UPDATED: Random vertical spread from -100px to -250px
                 const yEnd = (Math.random() * -150) - 100;
-                // UPDATED: Random duration
-                const duration = (Math.random() * 1) + 1.5; // 1.5s to 2.5s
-                
-                const color = colors[Math.floor(Math.random() * colors.length)];
-                
-                particle.style.setProperty('--color', color);
+                const duration = (Math.random() * 1) + 1.5;
+                particle.style.setProperty('--color', ['#22d3ee', '#06b6d4', '#0891b2', '#f0f9ff', '#e0f2fe'][Math.floor(Math.random() * 5)]);
                 particle.style.setProperty('--x-end', `${xEnd}px`);
-                // NEW: Set random Y end
                 particle.style.setProperty('--y-end', `${yEnd}px`);
-                // NEW: Set random duration
                 particle.style.setProperty('--duration', `${duration}s`);
-                
-                // UPDATED: Set start position to the button
                 particle.style.left = `${startX}px`;
                 particle.style.top = `${startY}px`;
-                
-                // Remove particle from DOM after animation
-                particle.addEventListener('animationend', () => {
-                    particle.remove();
-                });
-
+                particle.addEventListener('animationend', () => particle.remove());
                 container.appendChild(particle);
             }
         }
 
-        /**
-         * NEW: Creates the animated particle background
-         */
         function createParticleBackground() {
             const container = document.getElementById('particle-bg-container');
-            if (!container) return; // Exit if container not found
-            
-            // UPDATED: Increased particle count
-            const particleCount = 45;
-            // UPDATED: Removed spritePositions, as we are using a single bubble image
-            
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('span');
-                particle.className = 'particle';
-                
-                const xPos = Math.random() * 100;
-                const animDuration = Math.random() * 15 + 10; // 10s to 25s
-                const animDelay = Math.random() * 15; // 0s to 15s delay
-                const opacity = Math.random() * 0.6 + 0.2; // 0.2 to 0.8
-                // UPDATED: Increased scale
-                const scale = Math.random() * 0.8 + 0.8; // Was 0.8 + 0.5, now 0.8 + 0.8 (range 0.8 to 1.6)
-                // UPDATED: Removed sprite logic
-
-                particle.style.left = `${xPos}vw`;
-                particle.style.animationDuration = `${animDuration}s`;
-                particle.style.animationDelay = `${animDelay}s`;
-                particle.style.setProperty('--opacity', opacity);
-                particle.style.setProperty('--scale', scale);
-                // UPDATED: Removed backgroundPosition setting
-                
-                container.appendChild(particle);
+            for (let i = 0; i < 45; i++) {
+                const p = document.createElement('span');
+                p.className = 'particle';
+                p.style.left = `${Math.random() * 100}vw`;
+                p.style.animationDuration = `${Math.random() * 15 + 10}s`;
+                p.style.animationDelay = `${Math.random() * 15}s`;
+                p.style.setProperty('--opacity', Math.random() * 0.6 + 0.2);
+                p.style.setProperty('--scale', Math.random() * 0.8 + 0.8);
+                container.appendChild(p);
             }
         }
 
-        // --- Event Listeners ---
         jsonFileInput.addEventListener('change', handleJsonFile);
         packNameInput.addEventListener('input', validatePackState);
         packDescInput.addEventListener('input', validatePackState);
         packIconInput.addEventListener('change', handlePackIconUpload);
-        
         addParticleButton.addEventListener('click', handleAddParticleClick);
         generateButton.addEventListener('click', handleGenerateClick);
-        copyButton.addEventListener('click', copyCommandToClipboard);
-
-        addAnotherButton.addEventListener('click', () => {
-            stepChoiceSection.classList.add('hidden');
-            step2Section.classList.remove('hidden');
-            scrollToElement(step2Section); // ADDED
-            cancelAddParticleButton.classList.remove('hidden'); // Show cancel button
-            jsonFileInput.value = '';
-
-            // NEW: Reset titles but keep checkmarks hidden
-            step2Title.textContent = "Upload Additional .json File";
-            step3Title.textContent = "Upload Additional Textures";
-            step2Check.classList.add('hidden');
-            step3Check.classList.add('hidden');
+        copyButton.addEventListener('click', () => {
+            const el = document.createElement('textarea'); el.value = commandText.textContent; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
+            copyButton.textContent = 'Copied!'; setTimeout(() => copyButton.textContent = 'Copy', 2000);
         });
-        
-        cancelAddParticleButton.addEventListener('click', () => {
-            resetCurrentParticle();
-            step2Section.classList.add('hidden');
-            step3Section.classList.add('hidden');
-            stepAddParticle.classList.add('hidden');
-            cancelAddParticleButton.classList.add('hidden'); // Hide itself
-            
-            // NEW: Hide checkmarks on cancel
-            step2Check.classList.add('hidden');
-            step3Check.classList.add('hidden');
-            
-            stepChoiceSection.classList.remove('hidden'); // Show choices again
-            scrollToElement(stepChoiceSection); // ADDED
-        });
-
-        // NEW: Event Listener for Snowstorm Toggle
-        toggleSnowstormEmbed.addEventListener('click', () => {
-            const isHidden = snowstormIframeContainer.classList.toggle('hidden');
-            if (isHidden) {
-                snowstormChevron.classList.remove('rotate-180');
-            } else {
-                snowstormChevron.classList.add('rotate-180');
-                scrollToElement(snowstormIframeContainer); // Scroll to it when opened
-            }
-        });
-        
-        function renderWandIconSelector() {
-            wandIconSelectionContainer.innerHTML = '';
-            
-            for (const [id, blob] of builtInWandBlobs.entries()) {
-                const button = document.createElement('button');
-                button.type = 'button';
-                button.dataset.wandId = id;
-                button.className = "bg-gray-600 rounded-lg p-2 border-2 border-transparent transition-all duration-150 hover:bg-gray-500 focus:outline-none";
-                button.title = `${id} wand`;
-                
-                const img = document.createElement('img');
-                img.src = URL.createObjectURL(blob); 
-                img.alt = `${id} wand texture`;
-                img.className = "w-full h-auto object-contain";
-                
-                img.onload = () => { URL.revokeObjectURL(img.src); }
-                
-                button.appendChild(img);
-                button.addEventListener('click', handleWandIconSelection);
-                wandIconSelectionContainer.appendChild(button);
-            }
-        }
+        addAnotherButton.addEventListener('click', () => { stepChoiceSection.classList.add('hidden'); step2Section.classList.remove('hidden'); scrollToElement(step2Section); cancelAddParticleButton.classList.remove('hidden'); jsonFileInput.value = ''; step2Title.textContent = "Upload Additional .json File"; step3Title.textContent = "Upload Additional Textures"; step2Check.classList.add('hidden'); step3Check.classList.add('hidden'); });
+        cancelAddParticleButton.addEventListener('click', () => { resetCurrentParticle(); step2Section.classList.add('hidden'); step3Section.classList.add('hidden'); stepAddParticle.classList.add('hidden'); cancelAddParticleButton.classList.add('hidden'); stepChoiceSection.classList.remove('hidden'); scrollToElement(stepChoiceSection); });
+        toggleSnowstormEmbed.addEventListener('click', () => { const isHidden = snowstormIframeContainer.classList.toggle('hidden'); if (isHidden) { snowstormChevron.classList.remove('rotate-180'); } else { snowstormChevron.classList.add('rotate-180'); scrollToElement(snowstormIframeContainer); } });
 
         async function init() {
-            try {
-                for (const [id, filename] of wandFiles.entries()) {
-                    // Use the full URL directly
-                    const response = await fetch(new URL(filename).href);
-                    if (!response.ok) {
-                        throw new Error(`Failed to load ${filename}`);
-                    }
+            for (const [id, filename] of wandFiles.entries()) {
+                try {
+                    const response = await fetch(filename, { mode: 'cors' });
+                    if (!response.ok) throw new Error(`Status ${response.status}`);
                     const blob = await response.blob();
                     builtInWandBlobs.set(id, blob);
+                } catch (e) {
+                    console.warn(`Could not load wand ${id} from ${filename}:`, e);
                 }
-                
-                renderWandIconSelector();
-
-            } catch (e) {
-                console.error("Failed to load built-in wand icons:", e);
-                showError(`Error: Failed to load wand images from GitHub. [${e.message}]`);
             }
             
+            wandIconSelectionContainer.innerHTML = '';
+            for (const [id, blob] of builtInWandBlobs.entries()) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.dataset.wandId = id;
+                btn.className = "bg-gray-600 rounded-lg p-2 border-2 border-transparent transition-all duration-150 hover:bg-gray-500 focus:outline-none";
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(blob);
+                img.className = "w-full h-auto object-contain";
+                img.onload = () => URL.revokeObjectURL(img.src);
+                btn.appendChild(img);
+                btn.addEventListener('click', handleWandIconSelection);
+                wandIconSelectionContainer.appendChild(btn);
+            }
+
             validatePackState();
             validateCurrentParticleState();
-            createParticleBackground(); // NEW: Call the function
+            createParticleBackground();
         }
 
         init();
-
     </script>
 </body>
 </html>
