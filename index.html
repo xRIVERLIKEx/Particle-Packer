@@ -111,6 +111,7 @@
         <div id="global-error-message" class="hidden mb-6 p-4 bg-red-900/50 border border-red-500 rounded-lg text-red-200 text-center font-medium animate-pulse">
         </div>
 
+        <!-- RESTORED: Snowstorm Embed Section -->
         <section id="snowstorm-embed-section" class="mb-8 bg-gray-700 p-4 rounded-lg">
             <button id="toggle-snowstorm-embed" class="w-full text-left text-2xl font-semibold flex justify-between items-center transition-colors duration-200 hover:text-cyan-400">
                 <span>Open Snowstorm Editor</span>
@@ -121,7 +122,7 @@
             <div id="snowstorm-iframe-container" class="hidden mt-4 aspect-[16/10] w-full rounded-lg overflow-hidden border-2 border-gray-600">
                 <iframe id="snowstorm-iframe" src="https://snowstorm.app/" class="w-full h-full" title="Snowstorm Particle Editor" allow="clipboard-read; clipboard-write; fullscreen"></iframe>
             </div>
-            <p class="text-sm text-gray-400 mt-2 italic text-center">Note: If the editor doesn't load, you can visit <a href="https://snowstorm.app/" target="_blank" class="text-cyan-400 hover:underline font-bold">snowstorm.app</a> directly.</p>
+            <p class="text-sm text-gray-400 mt-2 italic text-center">Note: Designing your particle here? Export the <span class="text-cyan-400 font-mono">.json</span> file to use in the steps below.</p>
         </section>
 
         <div class="space-y-8">
@@ -171,7 +172,7 @@
                     </div>
                 </div>
                 <div id="step-1-hint" class="text-center py-2 bg-cyan-900/20 border border-cyan-800 rounded-lg text-cyan-400 text-sm font-pixel animate-pulse">
-                    Fill out Step 1 to unlock the JSON uploader below!
+                    Fill out Step 1 completely to unlock the JSON uploader!
                 </div>
             </section>
 
@@ -408,6 +409,7 @@
 
         function handleJsonFile(event) {
             const file = event.target.files[0];
+            console.log("JSON File Selected:", file?.name); 
             if (!file) {
                 resetCurrentParticle();
                 return;
@@ -419,10 +421,9 @@
                     const jsonString = e.target.result;
                     let tempJson = JSON.parse(jsonString);
                     if (!tempJson.particle_effect || !tempJson.particle_effect.description) {
-                        throw new Error("Missing 'particle_effect' or 'description' in JSON.");
+                        throw new Error("Invalid JSON structure: Missing 'particle_effect' or 'description'. Make sure this is a Minecraft particle file.");
                     }
                     
-                    // FIXED: Automatic naming convention fix
                     currentIdentifier = tempJson.particle_effect.description.identifier;
                     if (!currentIdentifier) {
                         currentIdentifier = "cleverlike:" + currentOriginalFileName.replace(/.json$/i, '');
@@ -430,20 +431,22 @@
                         currentIdentifier = "cleverlike:" + currentIdentifier;
                     }
                     
-                    // Force update the identifier in the JSON object
                     tempJson.particle_effect.description.identifier = currentIdentifier;
 
                     const particlePrefix = currentOriginalFileName.replace(/.json$/i, '').replace(/[^a-z0-9]/gi, '_'); 
+                    
                     const regex = /"(textures\/.*?)"/g;
                     const matches = [...jsonString.matchAll(regex)].map(m => m[1]);
                     const originalPaths = new Set(matches);
                     
-                    let modifiedJsonString = JSON.stringify(tempJson); // Use the fixed identifier string
+                    let modifiedJsonString = JSON.stringify(tempJson); 
                     currentRequiredTextures.clear(); 
                     
                     originalPaths.forEach(originalPath => {
                         const fileName = originalPath.split('/').pop();
-                        const newPath = `textures/particles/${particlePrefix}_${fileName}`; 
+                        const cleanFileName = fileName.endsWith('.png') ? fileName : fileName + '.png';
+                        const newPath = `textures/particles/${particlePrefix}_${cleanFileName}`; 
+                        
                         currentRequiredTextures.add(newPath);
                         modifiedJsonString = modifiedJsonString.replace(new RegExp(`"${originalPath}"`, 'g'), `"${newPath}"`);
                     });
@@ -463,8 +466,13 @@
                     validateCurrentParticleState();
                 } catch (err) {
                     showError(`JSON Error: ${err.message}`);
+                    console.error("Parse Error:", err);
                     resetCurrentParticle();
                 }
+            };
+            reader.onerror = (err) => {
+                showError("Could not read the file. Please try again.");
+                console.error("FileReader Error:", err);
             };
             reader.readAsText(file);
         }
@@ -472,7 +480,7 @@
         function renderTextureInputs() {
             textureUploadsContainer.innerHTML = '';
             if (currentNewTexturesToUpload.size === 0 && currentJson) {
-                textureUploadsContainer.innerHTML = '<div class="bg-gray-800 p-4 rounded-lg text-center text-gray-400">No new textures needed for this particle.</div>';
+                textureUploadsContainer.innerHTML = '<div class="bg-gray-800 p-4 rounded-lg text-center text-gray-400">No new textures detected. If your particle is invisible, check your JSON texture paths.</div>';
             } else if (currentNewTexturesToUpload.size > 0) {
                 currentNewTexturesToUpload.forEach(path => {
                     const container = document.createElement('div');
@@ -654,6 +662,20 @@
             }
         }
 
+        async function clearServiceWorkers() {
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (let registration of registrations) {
+                        registration.unregister();
+                        console.log("Unregistered old Service Worker");
+                    }
+                } catch (err) {
+                    console.warn("Service worker registration access denied or unavailable in this state:", err.message);
+                }
+            }
+        }
+
         // Event Listeners
         jsonFileInput.addEventListener('change', handleJsonFile);
         packNameInput.addEventListener('input', validatePackState);
@@ -701,6 +723,8 @@
         });
 
         async function init() {
+            clearServiceWorkers();
+            
             for (const filename of wandFilenames) {
                 try {
                     const id = filename.split('.')[0];
