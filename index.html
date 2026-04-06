@@ -122,7 +122,7 @@
             <div id="snowstorm-iframe-container" class="hidden mt-4 aspect-[16/10] w-full rounded-lg overflow-hidden border-2 border-gray-600">
                 <iframe id="snowstorm-iframe" src="https://snowstorm.app/" class="w-full h-full" title="Snowstorm Particle Editor" allow="clipboard-read; clipboard-write; fullscreen"></iframe>
             </div>
-            <p class="text-sm text-gray-400 mt-2 italic text-center">Note: Designing your particle here? Export the <span class="text-cyan-400 font-mono">.json</span> file to use in the steps below.</p>
+            <p class="text-sm text-gray-400 mt-2 italic text-center">Note: Designing your particle here? Export the <span class="text-cyan-400 font-mono">.json</span> file OR Copy the code to use in the steps below.</p>
         </section>
 
         <div class="space-y-8">
@@ -185,16 +185,31 @@
             <!-- Step 2: Snowstorm File -->
             <section id="step-2-json" class="space-y-4 hidden border-t border-gray-700 pt-8">
                 <h2 class="text-3xl border-b-2 border-gray-700 pb-2 flex justify-between items-center">
-                    <span id="step-2-title-text">Step 2: Upload Particle .json</span>
+                    <span id="step-2-title-text">Step 2: Add Particle .json</span>
                     <span id="step-2-check" class="text-cyan-500 hidden">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                         </svg>
                     </span>
                 </h2>
-                <div class="bg-gray-800 p-6 rounded-xl border-2 border-dashed border-gray-600 hover:border-cyan-500 transition duration-300">
-                    <label for="json-file-input" class="block text-lg font-medium text-gray-200 mb-4 text-center">Select your Snowstorm file (Required)</label>
-                    <input type="file" id="json-file-input" accept=".json,application/json" class="w-full">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Option A: File Upload -->
+                    <div class="bg-gray-800 p-6 rounded-xl border-2 border-dashed border-gray-600 hover:border-cyan-500 transition duration-300">
+                        <h3 class="text-lg font-pixel text-center text-cyan-400 mb-4 tracking-tighter">Option A: Upload File</h3>
+                        <input type="file" id="json-file-input" accept=".json,application/json" class="w-full">
+                    </div>
+                    <!-- Option B: Paste Code -->
+                    <div class="bg-gray-800 p-6 rounded-xl border-2 border-gray-600 hover:border-cyan-500 transition duration-300">
+                        <h3 class="text-lg font-pixel text-center text-cyan-400 mb-4 tracking-tighter">Option B: Paste Code</h3>
+                        <button id="paste-json-button" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-4 rounded-lg mb-4 flex items-center justify-center gap-2 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                                <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                            </svg>
+                            Paste from Clipboard
+                        </button>
+                        <textarea id="json-paste-area" placeholder="...or manually paste JSON here" rows="1" class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-xs font-mono focus:ring-1 focus:ring-cyan-500 focus:outline-none"></textarea>
+                    </div>
                 </div>
             </section>
 
@@ -293,6 +308,8 @@
         const packIconFeedback = document.getElementById('pack-icon-feedback');
         const step1Hint = document.getElementById('step-1-hint');
         const jsonFileInput = document.getElementById('json-file-input');
+        const jsonPasteArea = document.getElementById('json-paste-area');
+        const pasteJsonButton = document.getElementById('paste-json-button');
         const particleListSection = document.getElementById('particle-list-section');
         const particleListContainer = document.getElementById('particle-list-container');
         const step2Section = document.getElementById('step-2-json'); 
@@ -407,80 +424,99 @@
             }
         }
 
+        // Logic shared between File and Paste methods
+        function processJsonString(jsonString, fileName) {
+            try {
+                let tempJson = JSON.parse(jsonString);
+                if (!tempJson.particle_effect || !tempJson.particle_effect.description) {
+                    throw new Error("Invalid JSON: Make sure this is a Minecraft particle file.");
+                }
+                
+                currentIdentifier = tempJson.particle_effect.description.identifier;
+                if (!currentIdentifier) {
+                    currentIdentifier = "cleverlike:" + fileName.replace(/.json$/i, '');
+                } else if (!currentIdentifier.includes(':')) {
+                    currentIdentifier = "cleverlike:" + currentIdentifier;
+                }
+                
+                tempJson.particle_effect.description.identifier = currentIdentifier;
+
+                const particlePrefix = fileName.replace(/.json$/i, '').replace(/[^a-z0-9]/gi, '_'); 
+                const regex = /"(textures\/.*?)"/g;
+                const matches = [...jsonString.matchAll(regex)].map(m => m[1]);
+                const originalPaths = new Set(matches);
+                
+                let modifiedJsonString = JSON.stringify(tempJson); 
+                currentRequiredTextures.clear(); 
+                
+                originalPaths.forEach(originalPath => {
+                    const pathParts = originalPath.split('/');
+                    const originalName = pathParts.pop();
+                    const cleanFileName = originalName.endsWith('.png') ? originalName : originalName + '.png';
+                    const newPath = `textures/particles/${particlePrefix}_${cleanFileName}`; 
+                    
+                    currentRequiredTextures.add(newPath);
+                    modifiedJsonString = modifiedJsonString.replace(new RegExp(`"${originalPath}"`, 'g'), `"${newPath}"`);
+                });
+                
+                currentJson = JSON.parse(modifiedJsonString);
+                currentNewTexturesToUpload.clear();
+                currentRequiredTextures.forEach(path => {
+                    if (!allUploadedTextures.has(path)) {
+                        currentNewTexturesToUpload.add(path);
+                    }
+                });
+                
+                renderTextureInputs();
+                step3Section.classList.remove('hidden');
+                step2Check.classList.remove('hidden');
+                scrollToElement(step3Section);
+                validateCurrentParticleState();
+            } catch (err) {
+                showError(`Error processing particle: ${err.message}`);
+                resetCurrentParticle();
+            }
+        }
+
         function handleJsonFile(event) {
             const file = event.target.files[0];
-            console.log("JSON File Selected:", file?.name); 
             if (!file) {
                 resetCurrentParticle();
                 return;
             }
             currentOriginalFileName = file.name;
             const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const jsonString = e.target.result;
-                    let tempJson = JSON.parse(jsonString);
-                    if (!tempJson.particle_effect || !tempJson.particle_effect.description) {
-                        throw new Error("Invalid JSON structure: Missing 'particle_effect' or 'description'. Make sure this is a Minecraft particle file.");
-                    }
-                    
-                    currentIdentifier = tempJson.particle_effect.description.identifier;
-                    if (!currentIdentifier) {
-                        currentIdentifier = "cleverlike:" + currentOriginalFileName.replace(/.json$/i, '');
-                    } else if (!currentIdentifier.includes(':')) {
-                        currentIdentifier = "cleverlike:" + currentIdentifier;
-                    }
-                    
-                    tempJson.particle_effect.description.identifier = currentIdentifier;
-
-                    const particlePrefix = currentOriginalFileName.replace(/.json$/i, '').replace(/[^a-z0-9]/gi, '_'); 
-                    
-                    const regex = /"(textures\/.*?)"/g;
-                    const matches = [...jsonString.matchAll(regex)].map(m => m[1]);
-                    const originalPaths = new Set(matches);
-                    
-                    let modifiedJsonString = JSON.stringify(tempJson); 
-                    currentRequiredTextures.clear(); 
-                    
-                    originalPaths.forEach(originalPath => {
-                        const fileName = originalPath.split('/').pop();
-                        const cleanFileName = fileName.endsWith('.png') ? fileName : fileName + '.png';
-                        const newPath = `textures/particles/${particlePrefix}_${cleanFileName}`; 
-                        
-                        currentRequiredTextures.add(newPath);
-                        modifiedJsonString = modifiedJsonString.replace(new RegExp(`"${originalPath}"`, 'g'), `"${newPath}"`);
-                    });
-                    
-                    currentJson = JSON.parse(modifiedJsonString);
-                    currentNewTexturesToUpload.clear();
-                    currentRequiredTextures.forEach(path => {
-                        if (!allUploadedTextures.has(path)) {
-                            currentNewTexturesToUpload.add(path);
-                        }
-                    });
-                    
-                    renderTextureInputs();
-                    step3Section.classList.remove('hidden');
-                    step2Check.classList.remove('hidden');
-                    scrollToElement(step3Section);
-                    validateCurrentParticleState();
-                } catch (err) {
-                    showError(`JSON Error: ${err.message}`);
-                    console.error("Parse Error:", err);
-                    resetCurrentParticle();
-                }
-            };
-            reader.onerror = (err) => {
-                showError("Could not read the file. Please try again.");
-                console.error("FileReader Error:", err);
-            };
+            reader.onload = (e) => processJsonString(e.target.result, file.name);
             reader.readAsText(file);
+        }
+
+        async function handlePaste() {
+            try {
+                const text = await navigator.clipboard.readText();
+                if (text) {
+                    currentOriginalFileName = "pasted_particle_" + Date.now() + ".json";
+                    processJsonString(text, currentOriginalFileName);
+                } else {
+                    showError("Clipboard is empty.");
+                }
+            } catch (err) {
+                showError("Could not access clipboard. Please manually paste into the text box.");
+            }
+        }
+
+        function handleManualPaste(event) {
+            const text = event.target.value;
+            if (text.trim().startsWith('{')) {
+                currentOriginalFileName = "manual_paste_" + Date.now() + ".json";
+                processJsonString(text, currentOriginalFileName);
+                event.target.value = ""; // Clear area
+            }
         }
 
         function renderTextureInputs() {
             textureUploadsContainer.innerHTML = '';
             if (currentNewTexturesToUpload.size === 0 && currentJson) {
-                textureUploadsContainer.innerHTML = '<div class="bg-gray-800 p-4 rounded-lg text-center text-gray-400">No new textures detected. If your particle is invisible, check your JSON texture paths.</div>';
+                textureUploadsContainer.innerHTML = '<div class="bg-gray-800 p-4 rounded-lg text-center text-gray-400 font-pixel text-xs tracking-tighter">No new textures detected for this JSON.</div>';
             } else if (currentNewTexturesToUpload.size > 0) {
                 currentNewTexturesToUpload.forEach(path => {
                     const container = document.createElement('div');
@@ -678,6 +714,8 @@
 
         // Event Listeners
         jsonFileInput.addEventListener('change', handleJsonFile);
+        pasteJsonButton.addEventListener('click', handlePaste);
+        jsonPasteArea.addEventListener('input', handleManualPaste);
         packNameInput.addEventListener('input', validatePackState);
         packDescInput.addEventListener('input', validatePackState);
         packIconInput.addEventListener('change', handlePackIconUpload);
